@@ -1,6 +1,8 @@
 package com.dsingh.wget.core;
 
+import com.dsingh.wget.DManager;
 import com.dsingh.wget.Logs;
+import com.dsingh.wget.NetworkUtils;
 import com.dsingh.wget.core.info.ex.DownloadError;
 import com.dsingh.wget.core.info.ex.DownloadIOCodeError;
 import com.dsingh.wget.core.info.ex.DownloadIOError;
@@ -55,7 +57,8 @@ public class RetryWrap {
             if (Thread.currentThread().isInterrupted())
                 throw new DownloadInterruptedError("Interrupted");
 
-            if (!NetworkUtils.isNetworkAvailable(getAppContext()))
+            Logs.w("RetryWrap: run()", "DManager.getInstance().getAppContext()1", e);
+            if (!NetworkUtils.isNetworkAvailable(DManager.getInstance().getAppContext()))
                 i = RETRY_DELAY;
 
             try {
@@ -82,7 +85,9 @@ public class RetryWrap {
                 } catch (FileNotFoundException e) {
                     throw new DownloadError(e);
                 } catch (RuntimeException e) {
-                    if (!NetworkUtils.isNetworkAvailable(getAppContext())) {
+                    Logs.w("RetryWrap: run()", "DManager.getInstance().getAppContext()", e);
+
+                    if (!NetworkUtils.isNetworkAvailable(DManager.getInstance().getAppContext())) {
                         Logs.w("RetryWrap: run()", "throw DownloadRetry(e)", e);
                         throw new DownloadRetry(e);
                     }

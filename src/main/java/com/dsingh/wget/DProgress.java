@@ -11,7 +11,6 @@ public class DProgress implements Parcelable {
     private int downloadCode;
     private String downloadUid;
     private String title;
-    private final int notificationId;
 
     private DState dState;
     private DState dLastState = DState.QUEUED;
@@ -26,7 +25,6 @@ public class DProgress implements Parcelable {
         this.downloadCode = dBundle.getDownloadCode();
         this.downloadUid = dBundle.getDownloadUid();
         this.title = dBundle.getTitle();
-        this.notificationId = generateNotificationId(this.downloadUid);
     }
 
     public String getDownloadUID() {
@@ -113,7 +111,6 @@ public class DProgress implements Parcelable {
         downloadCode = in.readInt();
         downloadUid = in.readString();
         title = in.readString();
-        notificationId = in.readInt();
         dState = (DState) in.readValue(DState.class.getClassLoader());
         dLastState = (DState) in.readValue(DState.class.getClassLoader());
         showAudio = in.readByte() != 0x00;
@@ -134,7 +131,6 @@ public class DProgress implements Parcelable {
         dest.writeInt(downloadCode);
         dest.writeString(downloadUid);
         dest.writeString(title);
-        dest.writeInt(notificationId);
         dest.writeValue(dState);
         dest.writeValue(dLastState);
         dest.writeByte((byte) (showAudio ? 0x01 : 0x00));

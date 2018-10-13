@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DTask implements TaskRunnable {
 
     private DRunnable mDRunnable;
+    private DBundle mDBundle;
     private final DManager sDManager;
     private Thread mCurrentThread;
     private String mDownloadUid;
@@ -12,8 +13,13 @@ public class DTask implements TaskRunnable {
 
     DTask(DManager dManager, DBundle dBundle) {
         sDManager = dManager;
-        mDRunnable = new DRunnable(this, dBundle, mStop);
+        mDBundle = dBundle;
+        mDRunnable = new DRunnable(dManager.getAppContext(), this, dBundle, mStop);
         mDownloadUid = dBundle.getDownloadUid();
+    }
+
+    public DBundle getDBundle() {
+        return mDBundle;
     }
 
     public void stopDownload() {

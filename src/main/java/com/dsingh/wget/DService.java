@@ -2,7 +2,6 @@ package com.dsingh.wget;
 
 import android.app.Notification;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -11,17 +10,11 @@ import android.os.Message;
 
 public abstract class DService extends Service {
 
-    private Handler handler = new IncomingHandler(Looper.myLooper());
+    protected Handler handler = new IncomingHandler(Looper.getMainLooper());
 
-    private static final String EXTRA_DBUNDLE = "DBundle";
+    protected static final String EXTRA_DBUNDLE = "DBundle";
 
-    public static final String ACTION_DMANAGER_CANCEL_ALL = DService.class.getSimpleName() + ".ACTION.CANCEL_ALL";
-
-    public static void startDownload(Context context, DBundle dBundle) {
-        Intent intent = new Intent(context, DService.class);
-        intent.putExtra(EXTRA_DBUNDLE, dBundle);
-        context.startService(intent);
-    }
+    public static final String ACTION_DMANAGER_CANCEL_ALL = DService.class.getSimpleName() + ".action.CANCEL_ALL";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -33,12 +26,20 @@ public abstract class DService extends Service {
         super.onCreate();
 
         if (!DManager.isAlive())
-            DManager.getInstance().reboot();
+            DManager.getInstance().reboot(getPoolSize());
 
         DManager.getInstance().setHandler(handler);
+        DManager.getInstance().setContext(this.getApplicationContext());
+        DManager.getInstance().setService(this);
 
         startForeground(Constants.DSERVICE_FG_NOTI_ID, getForegroundNotification());
     }
+
+    public abstract void onBundleQueued(DBundle dBundle);
+
+    public abstract void onBundleRemoved(DBundle dBundle);
+
+    public abstract int getPoolSize();
 
     public abstract Notification getForegroundNotification();
 
@@ -73,6 +74,8 @@ public abstract class DService extends Service {
         Logs.w("DService", "onDestroy(): invoked");
 
         DManager.getInstance().shutdown();
+
+        handler.obtainMessage(2, null).sendToTarget(); // if destroyed onLowMemory()
     }
 
     @Override

@@ -1,4 +1,6 @@
 package com.dsingh.wget;
+
+import android.content.Context;
 import android.os.Handler;
 
 import java.util.Queue;
@@ -14,7 +16,7 @@ import androidx.annotation.Nullable;
 public class DManager {
 
     @NonNull
-    private static final DManager sInstance;
+    private static final DManager sInstance; //TODO change
     @Nullable
     private BlockingQueue<Runnable> mDownloadWorkQueue;
     @Nullable
@@ -25,6 +27,20 @@ public class DManager {
     private static AtomicBoolean isAlive = new AtomicBoolean(false);
 
     private Handler mHandler;
+    private DService dService;
+    private Context context;
+
+    public void setService(DService dService) {
+        this.dService = dService;
+    }
+
+    public void setContext(Context context) {
+        this.context = context.getApplicationContext();
+    }
+
+    public Context getAppContext() {
+        return context;
+    }
 
     static {
         sInstance = new DManager();
@@ -34,21 +50,20 @@ public class DManager {
         return sInstance;
     }
 
-    public void initPool() {
+    public void initPool(int poolSize) {
         Logs.d("DManager: initPool()", "invoked");
 
-        int poolSize = Integer.valueOf(PreferenceHelper.getString(PreferenceHelper.DM_DOWNLOAD_COUNT, PreferenceHelper.DM_DOWNLOAD_COUNT_VALUE));
         mTaskWorkQueue = new LinkedBlockingQueue<>();
         mDownloadWorkQueue = new LinkedBlockingQueue<>();
         mThreadPool = new ThreadPoolExecutor(poolSize, poolSize, 0, TimeUnit.SECONDS, mDownloadWorkQueue);
     }
 
-    public void reboot() {
+    public void reboot(int poolSize) {
 
         synchronized (sInstance) {
             Logs.i("DManager", "reboot(): invoked");
 
-            initPool();
+            initPool(poolSize);
             isAlive.set(true);
         }
     }
@@ -74,7 +89,8 @@ public class DManager {
             mThreadPool = null;
             mDownloadWorkQueue = null;
             mTaskWorkQueue = null;
-            mHandler = null;
+            //mHandler = null;
+            //dService = null;
         }
     }
 
@@ -95,7 +111,8 @@ public class DManager {
             mTaskWorkQueue.add(dTask);
             mThreadPool.execute(dTask.getDRunnable());
 
-            Broadcaster.onBundleQueued(dBundle.getDownloadUid());
+            if (dService != null)
+                dService.onBundleQueued(dBundle);
 
             return true;
         }
@@ -138,7 +155,8 @@ public class DManager {
                     if (dTask.getCurrentThread() == null) {
                         sInstance.mThreadPool.remove(dTask.getDRunnable());
                         sInstance.mTaskWorkQueue.remove(dTask);
-                        Broadcaster.onBundleRemoved(downloadUID);
+                        if (sInstance.dService != null)
+                            sInstance.dService.onBundleRemoved(dTask.getDBundle());
                     }
                     dTask.stopDownload();
                 }
@@ -175,7 +193,8 @@ public class DManager {
                     //if thread is null, it means DRunnable was not started, if so, we need to set the state to STOPPED.
                     //if it got started there could be a problem.
                     //FIXME what if we do this after calling mThreadPool shutdown Now? read docs.
-                    Broadcaster.onBundleRemoved(dTask.getDownloadUid());
+                    if (sInstance.dService != null)
+                        sInstance.dService.onBundleRemoved(dTask.getDBundle());
                 }
             }
             //Broadcaster.onAllDownloadsCancelled();
@@ -223,7 +242,7 @@ public class DManager {
             return dState;
 
         String table = dBundle.isAudioOnly() ? DInfoHelper.TABLE_AUDIO : DInfoHelper.TABLE_VIDEO;
-        String state = DInfoHelper.getInstance().getInfoState(table, dBundle.getDownloadUid());
+        String state = DInfoHelper.getInstance(sInstance.getAppContext()).getInfoState(table, dBundle.getDownloadUid());
 
         return DInfoHelper.getInactiveDStateFromString(state);
     }
