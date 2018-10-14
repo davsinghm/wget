@@ -10,11 +10,17 @@ import android.os.Message;
 
 public abstract class DService extends Service {
 
-    protected Handler handler = new IncomingHandler(Looper.getMainLooper());
+    private Handler handler;
+    private DManager dManager;
 
     protected static final String EXTRA_DBUNDLE = "DBundle";
+    protected static final String EXTRA_DOWNLOAD_UID = "DownloadUid";
+    public static final String ACTION_DOWNLOAD_SERVICE_CANCEL_DOWNLOAD = DService.class.getSimpleName() + ".action.CANCEL_DOWNLOAD";
+    public static final String ACTION_DOWNLOAD_SERVICE_CANCEL_ALL = DService.class.getSimpleName() + ".action.CANCEL_ALL";
 
-    public static final String ACTION_DMANAGER_CANCEL_ALL = DService.class.getSimpleName() + ".action.CANCEL_ALL";
+    static final int MESSAGE_PROGRESS_ENDED = 0;
+    static final int MESSAGE_PROGRESS_ONGOING = 1;
+    static final int MESSAGE_SHUTDOWN = 2;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -25,15 +31,16 @@ public abstract class DService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        if (!DManager.isAlive())
-            DManager.getInstance().reboot(getPoolSize());
+        handler = new IncomingHandler(Looper.myLooper());
 
-        DManager.getInstance().setHandler(handler);
-        DManager.getInstance().setContext(this.getApplicationContext());
-        DManager.getInstance().setService(this);
+        dManager = new DManager(this, getPoolSize());
+        dManager.setHandler(handler);
+        dManager.setService(this);
 
-        startForeground(Constants.DSERVICE_FG_NOTI_ID, getForegroundNotification());
+        startForeground(getForegroundNotificationId(), getForegroundNotification());
     }
+
+    public abstract void onRepeatedBundleAdded(DBundle dBundle);
 
     public abstract void onBundleQueued(DBundle dBundle);
 
@@ -43,26 +50,37 @@ public abstract class DService extends Service {
 
     public abstract Notification getForegroundNotification();
 
-    public abstract void onRepeatedBundleAdded();
+    public abstract int getForegroundNotificationId();
+
+    public abstract void onDownloadManagerShutdown();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
-        if (ACTION_DMANAGER_CANCEL_ALL.equals(intent.getAction())) {
-            DManager.cancelAll();
+        if (ACTION_DOWNLOAD_SERVICE_CANCEL_DOWNLOAD.equals(intent.getAction())) {
+
+            dManager.cancelDownload(intent.getStringExtra(EXTRA_DOWNLOAD_UID));
+
+            return START_NOT_STICKY;
+
+        } else if (ACTION_DOWNLOAD_SERVICE_CANCEL_ALL.equals(intent.getAction())) {
+
+            dManager.cancelAll();
 
             return START_NOT_STICKY;
         }
 
-        DBundle bundle = intent.getParcelableExtra(EXTRA_DBUNDLE);
-        if (bundle != null) {
-            Logs.d("DService: onStartCommand()", "Got DBundle: " + bundle.getDownloadUid());
-            boolean isAdded = DManager.getInstance().queueDownload(bundle);
-            if (!isAdded)
-                onRepeatedBundleAdded();
-        } else
-            Logs.wtf("DService: onStartCommand()", "DBundle: Intent.ParcelableExtra is null", new IllegalArgumentException("Non-Fatal: DService: onStartCommand(): DBundle: Intent.ParcelableExtra is null"));
+        DBundle dBundle = intent.getParcelableExtra(EXTRA_DBUNDLE);
+
+        if (dBundle != null) {
+            Logs.d("DService: onStartCommand()", "Got DBundle: " + dBundle.getDownloadUid());
+
+            if (dManager.queueDownload(dBundle))
+                onBundleQueued(dBundle);
+            else
+                onRepeatedBundleAdded(dBundle);
+        }
 
         return START_REDELIVER_INTENT;
     }
@@ -73,9 +91,9 @@ public abstract class DService extends Service {
 
         Logs.w("DService", "onDestroy(): invoked");
 
-        DManager.getInstance().shutdown();
+        dManager.shutdown();
 
-        handler.obtainMessage(2, null).sendToTarget(); // if destroyed onLowMemory()
+        onDownloadManagerShutdown();
     }
 
     @Override
@@ -87,7 +105,7 @@ public abstract class DService extends Service {
 
     private class IncomingHandler extends Handler {
 
-        IncomingHandler(Looper looper) {
+        private IncomingHandler(Looper looper) {
             super(looper);
         }
 
@@ -95,7 +113,17 @@ public abstract class DService extends Service {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-            onProgressUpdated((DProgress) msg.obj, msg.what == 1);
+            switch (msg.what) {
+                case MESSAGE_SHUTDOWN:
+                    stopSelf();
+                    break;
+                case MESSAGE_PROGRESS_ONGOING:
+                    onProgressUpdated((DProgress) msg.obj, true);
+                    break;
+                case MESSAGE_PROGRESS_ENDED:
+                    onProgressUpdated((DProgress) msg.obj, false);
+                    break;
+            }
         }
     }
 

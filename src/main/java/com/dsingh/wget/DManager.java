@@ -3,246 +3,153 @@ package com.dsingh.wget;
 import android.content.Context;
 import android.os.Handler;
 
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class DManager {
 
-    @NonNull
-    private static final DManager sInstance; //TODO change
     @Nullable
-    private BlockingQueue<Runnable> mDownloadWorkQueue;
+    private BlockingQueue<Runnable> workQueue;
     @Nullable
-    private Queue<DTask> mTaskWorkQueue;
+    private BlockingQueue<DRunnable> runnableQueue;
     @Nullable
-    private ThreadPoolExecutor mThreadPool;
-    @NonNull
-    private static AtomicBoolean isAlive = new AtomicBoolean(false);
+    private ThreadPoolExecutor threadPool;
 
-    private Handler mHandler;
+    private Handler handler;
     private DService dService;
     private Context context;
-
-    public void setService(DService dService) {
-        this.dService = dService;
-    }
-
-    public void setContext(Context context) {
-        this.context = context.getApplicationContext();
-    }
 
     public Context getAppContext() {
         return context;
     }
 
-    static {
-        sInstance = new DManager();
+    DManager(Context context, int poolSize) {
+        this.context = context.getApplicationContext();
+
+        initialize(poolSize);
     }
 
-    public static DManager getInstance() {
-        return sInstance;
+    public void setHandler(Handler handler) {
+        this.handler = handler;
     }
 
-    public void initPool(int poolSize) {
+    public void setService(DService dService) {
+        this.dService = dService;
+    }
+
+    private void initialize(int poolSize) {
         Logs.d("DManager: initPool()", "invoked");
 
-        mTaskWorkQueue = new LinkedBlockingQueue<>();
-        mDownloadWorkQueue = new LinkedBlockingQueue<>();
-        mThreadPool = new ThreadPoolExecutor(poolSize, poolSize, 0, TimeUnit.SECONDS, mDownloadWorkQueue);
+        runnableQueue = new LinkedBlockingQueue<>();
+        workQueue = new LinkedBlockingQueue<>();
+        threadPool = new ThreadPoolExecutor(poolSize, poolSize, 0, TimeUnit.SECONDS, workQueue);
     }
 
-    public void reboot(int poolSize) {
+    void shutdown() {
 
-        synchronized (sInstance) {
-            Logs.i("DManager", "reboot(): invoked");
+        Logs.w("DManager", "shutdown(): invoked");
 
-            initPool(poolSize);
-            isAlive.set(true);
-        }
+        handler = null;
+
+        cancelAll();
+
+        threadPool.shutdown();
     }
 
-    public static boolean isAlive() { //TODO remove!!
-        synchronized (sInstance) {
-            return isAlive.get();
-        }
+    boolean queueDownload(DBundle dBundle) {
+
+        DRunnable dRunnable = new DRunnable(this, dBundle);
+
+        if (runnableQueue.contains(dRunnable))
+            return false;
+
+        runnableQueue.add(dRunnable);
+        threadPool.execute(dRunnable);
+
+        return true;
     }
 
-    public void shutdown() {
+    /*public static int getDownloadCount() {
 
         synchronized (sInstance) {
-
-            Logs.w("DManager", "shutdown(): invoked");
-
-            cancelAll();
-
-            isAlive.set(false);
-
-            mThreadPool.shutdown();
-
-            mThreadPool = null;
-            mDownloadWorkQueue = null;
-            mTaskWorkQueue = null;
-            //mHandler = null;
-            //dService = null;
-        }
-    }
-
-    public boolean queueDownload(DBundle dBundle) {
-
-        synchronized (sInstance) {
-
-            if (!isAlive.get()) {
-                Logs.wtf("DManager", "WTF! NotAlive: startDownload() is called. DBundle:UID: " + dBundle.getDownloadUid());
-                throw new IllegalStateException("DManager: WTF! NotAlive: startDownload() is called. DBundle:UID: " + dBundle.getDownloadUid());
-            }
-
-            DTask dTask = new DTask(this, dBundle);
-
-            if (mTaskWorkQueue.contains(dTask))
-                return false;
-
-            mTaskWorkQueue.add(dTask);
-            mThreadPool.execute(dTask.getDRunnable());
-
-            if (dService != null)
-                dService.onBundleQueued(dBundle);
-
-            return true;
-        }
-    }
-
-    public static int getDownloadCount() {
-
-        synchronized (sInstance) {
-            if (!isAlive.get()) {
-                Logs.e("DManager", "NotAlive: getDownloadCount() is called. return 0.");
-                return 0;
-            }
-
             int i = sInstance.mTaskWorkQueue.size();
             Logs.d("DManager", "getDownloadCount(): invoked, return " + i);
             return i;
         }
-    }
+    }*/
 
-    public static void cancelDownload(String downloadUID) {
-        synchronized (sInstance) {
+    void cancelDownload(String downloadUid) {
 
-            if (!isAlive.get()) {
-                Logs.e("DManager", "NotAlive: cancelDownload() is called. Param - UID: " + downloadUID);
-                return;
-            }
+        Logs.d("DManager", "cancelDownload(): invoked, UID: " + downloadUid);
 
-            Logs.d("DManager", "cancelDownload(): invoked, Param - UID: " + downloadUID);
+        for (DRunnable dRunnable : runnableQueue) {
+            if (dRunnable.getDownloadUid().equals(downloadUid)) {
 
-            DTask[] taskArray = new DTask[sInstance.mTaskWorkQueue.size()];
-            sInstance.mTaskWorkQueue.toArray(taskArray);
+                dRunnable.stopDownload();
+                if (dRunnable.getCurrentThread() == null) {
+                    threadPool.remove(dRunnable);
+                    runnableQueue.remove(dRunnable);
 
-            if (taskArray.length == 0) {
-                Logs.d("DManager", "cancelDownload(): Queue is empty, skip");
-                return;
-            }
-
-            for (DTask dTask : taskArray)
-                if (dTask.getDownloadUid().equals(downloadUID)) {
-                    if (dTask.getCurrentThread() == null) {
-                        sInstance.mThreadPool.remove(dTask.getDRunnable());
-                        sInstance.mTaskWorkQueue.remove(dTask);
-                        if (sInstance.dService != null)
-                            sInstance.dService.onBundleRemoved(dTask.getDBundle());
-                    }
-                    dTask.stopDownload();
-                }
-        }
-
-    }
-
-    public static void cancelAll() {
-        synchronized (sInstance) {
-
-            if (!isAlive.get()) {
-                Logs.e("DManager", "NotAlive: cancelAll() is called.");
-                return;
-            }
-
-            Logs.d("DManager", "cancelAll(): invoked");
-
-            DTask[] taskArray = new DTask[sInstance.mTaskWorkQueue.size()];
-            sInstance.mTaskWorkQueue.toArray(taskArray);
-
-            if (taskArray.length == 0) {
-                Logs.e("DManager", "cancelAll(): Queue is empty, skip");
-                return;
-            }
-
-            for (DTask dTask : taskArray) {
-                dTask.stopDownload();
-                if (dTask.getCurrentThread() == null) {
-                    boolean pool = sInstance.mThreadPool.remove(dTask.getDRunnable());
-                    Logs.d("DManager", "cancelAll(): UID: " + dTask.getDownloadUid() + ": ? removed Runnable from the Thread Pool: " + pool);
-                    boolean taskQ = sInstance.mTaskWorkQueue.remove(dTask);
-                    Logs.d("DManager", "cancelAll(): UID: " + dTask.getDownloadUid() + ": ? removed Task from the Queue: " + taskQ);
-
-                    //if thread is null, it means DRunnable was not started, if so, we need to set the state to STOPPED.
-                    //if it got started there could be a problem.
-                    //FIXME what if we do this after calling mThreadPool shutdown Now? read docs.
-                    if (sInstance.dService != null)
-                        sInstance.dService.onBundleRemoved(dTask.getDBundle());
+                    if (dService != null)
+                        dService.onBundleRemoved(dRunnable.getDBundle());
                 }
             }
-            //Broadcaster.onAllDownloadsCancelled();
         }
     }
 
+    void cancelAll() {
 
-    public boolean removeDTaskFromQueue(DTask dTask) {
+        Logs.d("DManager", "cancelAll(): invoked");
 
-        synchronized (sInstance) {
+        for (DRunnable dRunnable : runnableQueue) {
+            dRunnable.stopDownload();
+            if (dRunnable.getCurrentThread() == null) {
+                threadPool.remove(dRunnable);
+                runnableQueue.remove(dRunnable);
 
-            if (!isAlive.get()) {
-                Logs.e("DManager", "NotAlive: removeDTaskFromQueue() is called. Param - DTask:UID: " + dTask.getDownloadUid());
-                return false;
+                //if thread is null, it means DRunnable was not started, if so, we need to set the state to STOPPED.
+                //if it got started there could be a problem.
+                //FIXME what if we do this after calling mThreadPool shutdown Now? read docs.
+                if (dService != null)
+                    dService.onBundleRemoved(dRunnable.getDBundle());
+            }
+        }
+    }
+
+    boolean removeFromQueue(DRunnable dTask) {
+
+        boolean taskQ = runnableQueue.remove(dTask);
+        Logs.d("DManager: removeDTaskFromQueue()", "invoked. Param - DTask:UID: " + dTask.getDownloadUid() + " ? removed: " + taskQ);
+
+        if (taskQ)
+            if (runnableQueue.size() == 0) {
+                Logs.d("DManager", "stopService(): DManager.getDownloadCount() == 0");
+
+                if (handler != null)
+                    handler.obtainMessage(DService.MESSAGE_SHUTDOWN).sendToTarget();
             }
 
-            boolean taskQ = mTaskWorkQueue.remove(dTask);
-            Logs.d("DManager: removeDTaskFromQueue()", "invoked. Param - DTask:UID: " + dTask.getDownloadUid() + " ? removed: " + taskQ);
-            return taskQ;
-        }
+        return taskQ;
     }
 
-    public void progressUpdate(int onGoing, DProgress dProgress) {
+    void progressUpdate(int what, DProgress dProgress) {
 
-        synchronized (sInstance) {
-
-            if (!isAlive.get()) {
-                Logs.e("DManager", "NotAlive: progressUpdate() is called. Param - onGoing: " + onGoing + ", DProgress:UID: " + dProgress.getDownloadUID());
-                return;
-            }
-
-            mHandler.obtainMessage(onGoing, dProgress).sendToTarget();
-        }
-
+        if (handler != null)
+            handler.obtainMessage(what, dProgress).sendToTarget();
     }
 
-    public void setHandler(Handler handler) {
-        mHandler = handler;
-    }
-
-    public static DState getDownloadState(DBundle dBundle) {
+    public static DState getDownloadState(Context context, DBundle dBundle) {
 
         DState dState = getActiveDownloadState(dBundle);
         if (dState != null)
             return dState;
 
         String table = dBundle.isAudioOnly() ? DInfoHelper.TABLE_AUDIO : DInfoHelper.TABLE_VIDEO;
-        String state = DInfoHelper.getInstance(sInstance.getAppContext()).getInfoState(table, dBundle.getDownloadUid());
+        String state = DInfoHelper.getInstance(context).getInfoState(table, dBundle.getDownloadUid());
 
         return DInfoHelper.getInactiveDStateFromString(state);
     }
@@ -250,6 +157,8 @@ public class DManager {
     @Nullable
     public static DState getActiveDownloadState(DBundle dBundle) {
 
+        //TODO
+        /*
         synchronized (sInstance) {
             if (isAlive.get()) {
                 DTask[] taskArray = new DTask[sInstance.mTaskWorkQueue.size()];
@@ -259,9 +168,8 @@ public class DManager {
                     if (task.getDownloadUid().equals(dBundle.getDownloadUid()))
                         return task.getDRunnable().getState();
             }
-        }
+        }*/
 
         return null;
     }
-
 }

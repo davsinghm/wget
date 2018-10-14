@@ -22,9 +22,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectMultipart extends Direct {
 
-    LimitThreadPool limitThreadPool;
-    boolean isFatal;
-    final Object lock = new Object();
+    private LimitThreadPool limitThreadPool;
+    private boolean isFatal;
+    private final Object lock = new Object();
 
     public DirectMultipart(DownloadInfo info, File target) {
         super(info, target);
@@ -39,7 +39,7 @@ public class DirectMultipart extends Direct {
      *
      * @param part Part to download
      */
-    void downloadPart(Part part, AtomicBoolean stop, Runnable notify) throws IOException {
+    private void downloadPart(Part part, AtomicBoolean stop, Runnable notify) throws IOException {
         RandomAccessFile randomAccessFile = null;
         BufferedInputStream bufferedInputStream = null;
 
@@ -124,19 +124,19 @@ public class DirectMultipart extends Direct {
 
     }
 
-    boolean fatal() {
+    private boolean fatal() {
         synchronized (lock) {
             return isFatal;
         }
     }
 
-    void fatal(boolean bool) {
+    private void fatal(boolean bool) {
         synchronized (lock) {
             isFatal = bool;
         }
     }
 
-    void downloadWorker(final Part part, final AtomicBoolean stop, final Runnable notify) throws InterruptedException {
+    private void downloadWorker(final Part part, final AtomicBoolean stop, final Runnable notify) throws InterruptedException {
         limitThreadPool.blockExecute(new Runnable() {
             @Override
             public void run() {
@@ -193,7 +193,7 @@ public class DirectMultipart extends Direct {
         part.setState(State.WAITING);
     }
 
-    void askForHelp() {
+    private void askForHelp() {
 
         long minPartLength = getInfo().getDSettings().getMinPartLength();
         int threadCount = getInfo().getDSettings().getThreadCount();
@@ -234,7 +234,7 @@ public class DirectMultipart extends Direct {
 
     }
 
-    int runningPartCount() {
+    private int runningPartCount() {
         int running = 0;
         for (Part part : getInfo().getPartList()) {
             if (part.getState().equals(State.WAITING) || part.getState().equals(State.QUEUED) || part.getState().equals(State.DOWNLOADING) || part.getState().equals(State.RETRYING))
@@ -249,7 +249,7 @@ public class DirectMultipart extends Direct {
      *
      * @return next Part to download
      */
-    Part getPart() {
+    private Part getPart() {
         for (Part part : getInfo().getPartList()) {
             if (!part.getState().equals(State.QUEUED))
                 continue;
@@ -265,7 +265,7 @@ public class DirectMultipart extends Direct {
      *
      * @return true - done. false - not done yet
      */
-    boolean done(AtomicBoolean stop) {
+    private boolean done(AtomicBoolean stop) {
         if (stop.get())
             throw new DownloadInterruptedError("Stopped");
         if (Thread.interrupted())

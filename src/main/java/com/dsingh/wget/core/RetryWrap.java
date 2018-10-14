@@ -58,7 +58,7 @@ public class RetryWrap {
                 throw new DownloadInterruptedError("Interrupted");
 
             Logs.w("RetryWrap: run()", "DManager.getInstance().getAppContext()1", e);
-            if (!NetworkUtils.isNetworkAvailable(DManager.getInstance().getAppContext()))
+            if (!NetworkUtils.isNetworkAvailable(null))
                 i = RETRY_DELAY;
 
             try {
@@ -87,7 +87,7 @@ public class RetryWrap {
                 } catch (RuntimeException e) {
                     Logs.w("RetryWrap: run()", "DManager.getInstance().getAppContext()", e);
 
-                    if (!NetworkUtils.isNetworkAvailable(DManager.getInstance().getAppContext())) {
+                    if (!NetworkUtils.isNetworkAvailable(null)) {
                         Logs.w("RetryWrap: run()", "throw DownloadRetry(e)", e);
                         throw new DownloadRetry(e);
                     }

@@ -42,7 +42,7 @@ public class DInfoHelper extends SQLiteOpenHelper {
 
     private static synchronized void createInstance(Context context) {
         sInstance = new DInfoHelper(context);
-    }
+    }/**/
 
     public static synchronized DInfoHelper getInstance(Context context) {
         if (sInstance == null)
