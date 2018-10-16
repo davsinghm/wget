@@ -120,10 +120,10 @@ public class DManager {
         }
     }
 
-    boolean removeFromQueue(DRunnable dTask) {
+    boolean removeFromQueue(DRunnable dRunnable) {
 
-        boolean taskQ = runnableQueue.remove(dTask);
-        Logs.d("DManager: removeDTaskFromQueue()", "invoked. Param - DTask:UID: " + dTask.getDownloadUid() + " ? removed: " + taskQ);
+        boolean taskQ = runnableQueue.remove(dRunnable);
+        Logs.d("DManager: removeDTaskFromQueue()", "invoked. Param - DTask:UID: " + dRunnable.getDownloadUid() + " ? removed: " + taskQ);
 
         if (taskQ)
             if (runnableQueue.size() == 0) {

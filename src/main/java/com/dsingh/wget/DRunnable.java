@@ -99,13 +99,7 @@ public class DRunnable implements Runnable {
 
             doNextJob();
 
-        } catch (DownloadInterruptedError e) {
-            updateProgress(DState.STOPPED);
-            Logs.w("DRunnable: " + getDInfoID(), e);
-        } catch (MuxException e) {
-            Logs.wtf("DRunnable: " + getDInfoID(), e);
         } catch (Exception e) {
-            Logs.wtf("DRunnable: " + getDInfoID(), e);
             mStop.set(true);
         }
     }
@@ -172,14 +166,14 @@ public class DRunnable implements Runnable {
 
             File file = dBundle.getSubtitleFile();
 
-            new DirectSingleBg(dBundle.getSubtitleUrl(), file).downloadPart(mStop);
+            new DirectSingleBg(context, dBundle.getSubtitleUrl(), file).downloadPart(mStop);
 
         } catch (Exception e) { //TODO make fatal
             Logs.wtf("DRunnable: Non-Fatal, Critical: downloadSubtitles(): Failed to load subtitles.", e);
         }
     }
 
-    private void download(String url, File target) {
+    private void download(String url, File target) throws Exception {
 
        /* while (!mStop.get()) {
             updateProgress(DState.RETRYING);
@@ -224,18 +218,18 @@ public class DRunnable implements Runnable {
             mDInfo = new DownloadInfo(new URL(url));
             mDInfo.setDInfoID(getDInfoID());
             mDInfo.setDSettings(dSettings);
-            mDInfo.extract(mStop, notify);
+            mDInfo.extract(context, mStop, notify);
             mDInfo.fromString(notify, DInfoHelper.getInstance(context).getInfoString(getTableName(), dBundle.getDownloadUid()));
 
             if (mDInfo.isMultipart()) {
                 Logs.d("WGet", "createDirect(): MultiPart");
-                new DirectMultipart(mDInfo, target).download(mStop, notify);
+                new DirectMultipart(context, mDInfo, target).download(mStop, notify);
             } else if (mDInfo.hasRange()) {
                 Logs.d("WGet", "createDirect(): Range");
-                new DirectRange(mDInfo, target).download(mStop, notify);
+                new DirectRange(context, mDInfo, target).download(mStop, notify);
             } else {
                 Logs.d("WGet", "createDirect(): Single");
-                new DirectSingle(mDInfo, target).download(mStop, notify);
+                new DirectSingle(context, mDInfo, target).download(mStop, notify);
             }
 
         } catch (DownloadMultipartError e) {  //TODO improve, backport add suppressed ? + do all wget exception logging
@@ -257,15 +251,20 @@ public class DRunnable implements Runnable {
                 }
             Logs.wtf("DRunnable: " + getDInfoID(), e);
 
-        /*} catch (DownloadInterruptedError e) {
+            throw e;
+
+        } catch (DownloadInterruptedError e) {
             updateProgress(DState.STOPPED);
             Logs.w("DRunnable: " + getDInfoID(), e);
-            //return;*/
+
+            throw e;
         } catch (Exception e) {
-            Logs.wtf("DRunnable: " + getDInfoID(), e);
             updateProgress(DState.ERROR);
             mStop.set(true);
-            //return;
+
+            Logs.wtf("DRunnable: " + getDInfoID(), e);
+
+            throw e;
         }
 
         if (mDInfo.getState() != State.DONE) {
@@ -336,15 +335,13 @@ public class DRunnable implements Runnable {
 
             if (mFinished.get()) {
 
-                if (mLastDState != DState.ERROR && mLastDState != DState.STOPPED && mLastDState != DState.MUX_ERROR && mLastDState != DState.ENCODE_ERROR) {
+                if (mLastDState != DState.COMPLETE && mLastDState != DState.ERROR && mLastDState != DState.STOPPED && mLastDState != DState.MUX_ERROR && mLastDState != DState.ENCODE_ERROR) {
                     setCurrentThread(null);
                     Thread.interrupted();
                     progressUpdate(onGoing == 1 ? DService.MESSAGE_PROGRESS_ONGOING : DService.MESSAGE_PROGRESS_ENDED, mDProgress);
 
                     dManager.removeFromQueue(this);
                 }
-
-                //Broadcaster.downloadFinished();
 
             } else
                 progressUpdate(onGoing, mDProgress);
