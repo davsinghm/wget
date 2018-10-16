@@ -1,5 +1,7 @@
 package com.dsingh.wget.core;
 
+import android.content.Context;
+
 import com.dsingh.wget.Constants;
 import com.dsingh.wget.core.info.DownloadInfo;
 import com.dsingh.wget.core.info.State;
@@ -15,8 +17,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectRange extends Direct {
 
-    public DirectRange(DownloadInfo info, File target) {
-        super(info, target);
+    public DirectRange(Context context, DownloadInfo info, File target) {
+        super(context, info, target);
     }
 
     public void downloadPart(DownloadInfo info, AtomicBoolean stop, Runnable notify) throws IOException {
@@ -90,6 +92,12 @@ public class DirectRange extends Direct {
 
         try {
             RetryWrap.run(stop, new RetryWrap.Wrap() {
+
+                @Override
+                public Context getContext() {
+                    return context;
+                }
+
                 @Override
                 public Object download() throws IOException {
                     getInfo().setState(State.DOWNLOADING);

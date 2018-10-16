@@ -1,5 +1,7 @@
 package com.dsingh.wget.core;
 
+import android.content.Context;
+
 import com.dsingh.wget.Constants;
 import com.dsingh.wget.core.info.ex.DownloadInterruptedError;
 
@@ -16,8 +18,8 @@ public class DirectSingleBg extends Direct {
 
     private URL url;
 
-    public DirectSingleBg(String url, File target) throws MalformedURLException {
-        super(null, target);
+    public DirectSingleBg(Context context, String url, File target) throws MalformedURLException {
+        super(context, null, target);
         this.url = new URL(url);
     }
 

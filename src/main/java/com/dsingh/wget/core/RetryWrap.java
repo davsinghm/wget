@@ -1,6 +1,7 @@
 package com.dsingh.wget.core;
 
-import com.dsingh.wget.DManager;
+import android.content.Context;
+
 import com.dsingh.wget.Logs;
 import com.dsingh.wget.NetworkUtils;
 import com.dsingh.wget.core.info.ex.DownloadError;
@@ -9,7 +10,6 @@ import com.dsingh.wget.core.info.ex.DownloadIOError;
 import com.dsingh.wget.core.info.ex.DownloadInterruptedError;
 import com.dsingh.wget.core.info.ex.DownloadMoved;
 import com.dsingh.wget.core.info.ex.DownloadRetry;
-
 
 import java.io.EOFException;
 import java.io.FileNotFoundException;
@@ -27,9 +27,12 @@ import javax.net.ssl.SSLException;
 
 public class RetryWrap {
 
-    public static final int RETRY_DELAY = 10;
+    private static final int RETRY_DELAY = 10;
 
     public interface Wrap<T> {
+
+        Context getContext();
+
         void retry(int delay, Throwable e);
 
         void moved(URL url);
@@ -37,7 +40,7 @@ public class RetryWrap {
         T download() throws IOException;
     }
 
-    static <T> void moved(AtomicBoolean stop, Wrap<T> wrap, DownloadMoved e) {
+    private static <T> void moved(AtomicBoolean stop, Wrap<T> wrap, DownloadMoved e) {
         if (stop.get())
             throw new DownloadInterruptedError("Stopped");
 
@@ -47,7 +50,7 @@ public class RetryWrap {
         wrap.moved(e.getMoved());
     }
 
-    static <T> void retry(AtomicBoolean stop, Wrap<T> wrap, RuntimeException e) {
+    private static <T> void retry(AtomicBoolean stop, Wrap<T> wrap, RuntimeException e) {
         for (int i = RETRY_DELAY; i >= 0; i--) {
             wrap.retry(i, e);
 
@@ -57,8 +60,7 @@ public class RetryWrap {
             if (Thread.currentThread().isInterrupted())
                 throw new DownloadInterruptedError("Interrupted");
 
-            Logs.w("RetryWrap: run()", "DManager.getInstance().getAppContext()1", e);
-            if (!NetworkUtils.isNetworkAvailable(null))
+            if (!NetworkUtils.isNetworkAvailable(wrap.getContext()))
                 i = RETRY_DELAY;
 
             try {
@@ -85,12 +87,12 @@ public class RetryWrap {
                 } catch (FileNotFoundException e) {
                     throw new DownloadError(e);
                 } catch (RuntimeException e) {
-                    Logs.w("RetryWrap: run()", "DManager.getInstance().getAppContext()", e);
 
-                    if (!NetworkUtils.isNetworkAvailable(null)) {
+                    if (!NetworkUtils.isNetworkAvailable(wrap.getContext())) {
                         Logs.w("RetryWrap: run()", "throw DownloadRetry(e)", e);
                         throw new DownloadRetry(e);
                     }
+
                     throw e;
                 } catch (IOException e) {
                     if (e.getMessage().startsWith("unexpected end of stream")) { //NON-NLS

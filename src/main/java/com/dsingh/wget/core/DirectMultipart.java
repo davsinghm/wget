@@ -1,5 +1,6 @@
 package com.dsingh.wget.core;
 
+import android.content.Context;
 import android.os.Process;
 
 import com.dsingh.wget.Constants;
@@ -26,8 +27,8 @@ public class DirectMultipart extends Direct {
     private boolean isFatal;
     private final Object lock = new Object();
 
-    public DirectMultipart(DownloadInfo info, File target) {
-        super(info, target);
+    public DirectMultipart(Context context, DownloadInfo info, File target) {
+        super(context, info, target);
         this.limitThreadPool = new LimitThreadPool(info.getDSettings().getThreadCount());
     }
 
@@ -151,6 +152,11 @@ public class DirectMultipart extends Direct {
                     RetryWrap.run(stop, new RetryWrap.Wrap() {
 
                         @Override
+                        public Context getContext() {
+                            return context;
+                        }
+
+                        @Override
                         public Object download() throws IOException {
                             part.setState(State.DOWNLOADING);
                             notify.run();
@@ -193,19 +199,19 @@ public class DirectMultipart extends Direct {
         part.setState(State.WAITING);
     }
 
-    private void askForHelp() {
+    private void collaborate() {
 
         long minPartLength = getInfo().getDSettings().getMinPartLength();
         int threadCount = getInfo().getDSettings().getThreadCount();
         int c = runningPartCount();
-        Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "askForHelp(): runningPartCount: " + c + ", threadCount: " + threadCount + ", entryingLoop: " + (c < threadCount && c > 0));
+        Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): runningPartCount: " + c + ", threadCount: " + threadCount + ", entryingLoop: " + (c < threadCount && c > 0));
         if (c < threadCount && c > 0)
             for (Part part : getInfo().getSortedPartList()) {
                 int listSize = getInfo().getPartList().size();
                 State state = part.getState();
                 if (state.equals(State.DOWNLOADING) || state.equals(State.RETRYING)) {
 
-                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "askForHelp(): -- Trying to help Part: " + (part.getNumber() + 1) + " (Currently: " + state + ")");
+                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): -- Trying to help Part: " + (part.getNumber() + 1) + " (Currently: " + state + ")");
 
                     Part part1 = new Part();
                     part1.setState(State.QUEUED);
@@ -216,7 +222,7 @@ public class DirectMultipart extends Direct {
                     long end = part.getEnd();
                     long minSecs = getInfo().getSpeedInfo().getAverageSpeed() * Constants.MT_MIN_SEC_SPEED_MULTIPLE_FOR_IDM;
                     if (left < minSecs || left <= 0 || left < minPartLength) {
-                        Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "askForHelp(): ---- Skipping help Part: " + (part.getNumber() + 1) + " left: " + left + ", min: " + minSecs + " [left: " + (left / 1024) + "kb, min: " + (minSecs / 1024) + "kb, minPart: " + (minPartLength / 1024) + "kb]");
+                        Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- Skipping help Part: " + (part.getNumber() + 1) + " left: " + left + ", min: " + minSecs + " [left: " + (left / 1024) + "kb, min: " + (minSecs / 1024) + "kb, minPart: " + (minPartLength / 1024) + "kb]");
                         continue;
                     }
                     part.setEnd(start - 1);
@@ -225,8 +231,8 @@ public class DirectMultipart extends Direct {
 
                     getInfo().getPartList().add(part1);
 
-                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "askForHelp(): ---- Helping Part: " + (part.getNumber() + 1) + " left: " + left + ", min: " + minSecs + " [left: " + (left / 1024) + "kb, min: " + (minSecs / 1024) + "kb, minPart: " + (minPartLength / 1024) + "kb]");
-                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "askForHelp(): ---- NEW PART - start: " + part1.getStart() + " [" + (part1.getStart() / 1024) + "kb], end: " + part1.getEnd() + " [" + (part1.getEnd() / 1024) + "kb], length: " + part1.getLength() + " [" + (part1.getLength() / 1024) + "kb]");
+                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- Helping Part: " + (part.getNumber() + 1) + " left: " + left + ", min: " + minSecs + " [left: " + (left / 1024) + "kb, min: " + (minSecs / 1024) + "kb, minPart: " + (minPartLength / 1024) + "kb]");
+                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- NEW PART - start: " + part1.getStart() + " [" + (part1.getStart() / 1024) + "kb], end: " + part1.getEnd() + " [" + (part1.getEnd() / 1024) + "kb], length: " + part1.getLength() + " [" + (part1.getLength() / 1024) + "kb]");
 
                     break;
                 }
@@ -296,7 +302,7 @@ public class DirectMultipart extends Direct {
                     limitThreadPool.waitUntilNextTaskEnds();
 
                 if (getInfo().getDSettings().getMtStyle() == Constants.MT_STYLE_SMART)
-                    askForHelp();
+                    collaborate();
 
                 // if we start to receive errors. stop adding new tasks and wait until all active tasks be emptied
                 if (fatal()) {

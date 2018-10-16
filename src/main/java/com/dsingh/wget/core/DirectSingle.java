@@ -1,5 +1,7 @@
 package com.dsingh.wget.core;
 
+import android.content.Context;
+
 import com.dsingh.wget.Constants;
 import com.dsingh.wget.core.info.DownloadInfo;
 import com.dsingh.wget.core.info.State;
@@ -19,8 +21,8 @@ public class DirectSingle extends Direct {
      * @param info   download file information
      * @param target target file
      */
-    public DirectSingle(DownloadInfo info, File target) {
-        super(info, target);
+    public DirectSingle(Context context, DownloadInfo info, File target) {
+        super(context, info, target);
     }
 
     void downloadPart(DownloadInfo info, AtomicBoolean stop, Runnable notify) throws IOException {
@@ -77,6 +79,11 @@ public class DirectSingle extends Direct {
 
         try {
             RetryWrap.run(stop, new RetryWrap.Wrap() {
+
+                @Override
+                public Context getContext() {
+                    return context;
+                }
 
                 @Override
                 public Object download() throws IOException {

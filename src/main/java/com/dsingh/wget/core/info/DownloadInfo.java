@@ -1,5 +1,7 @@
 package com.dsingh.wget.core.info;
 
+import android.content.Context;
+
 import com.dsingh.wget.Constants;
 import com.dsingh.wget.DSettings;
 import com.dsingh.wget.Logs;
@@ -28,9 +30,9 @@ public class DownloadInfo extends URLInfo {
     }
 
     @Override
-    public void extract(final AtomicBoolean stop, final Runnable notify) {
+    public void extract(final Context context, final AtomicBoolean stop, final Runnable notify) {
         Logs.d("WGet: DownloadInfo: " + getDInfoID(), "extract(): invoked");
-        super.extract(stop, notify);
+        super.extract(context, stop, notify);
     }
 
     synchronized public DSettings getDSettings() {

@@ -1,5 +1,7 @@
 package com.dsingh.wget.core.info;
 
+import android.content.Context;
+
 import com.dsingh.wget.Constants;
 import com.dsingh.wget.Logs;
 import com.dsingh.wget.core.RetryWrap;
@@ -29,16 +31,21 @@ public class URLInfo extends BrowserInfo {
     private Throwable exception; // downloading error / retry error
     private int delay; // retrying delay
 
-    public URLInfo(URL source) {
+    URLInfo(URL source) {
         this.source = source;
         this.state = State.QUEUED;
     }
 
-    public void extract(AtomicBoolean stop, final Runnable notify) {
+    void extract(final Context context, AtomicBoolean stop, final Runnable notify) {
         Logs.d("WGet: URLInfo", "extract(): invoked");
         try {
             HttpURLConnection urlConnection = RetryWrap.run(stop, new RetryWrap.Wrap<HttpURLConnection>() {
                 URL url = source;
+
+                @Override
+                public Context getContext() {
+                    return context;
+                }
 
                 @Override
                 public HttpURLConnection download() throws IOException {
@@ -118,7 +125,7 @@ public class URLInfo extends BrowserInfo {
     }
 
     // if range failed - do plain download with no retrys's
-    protected HttpURLConnection extractRange(URL source) throws IOException {
+    private HttpURLConnection extractRange(URL source) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) source.openConnection();
 
         urlConnection.setConnectTimeout(Constants.WGET_CONNECT_TIMEOUT);
@@ -150,7 +157,7 @@ public class URLInfo extends BrowserInfo {
     }
 
     // if range failed - do plain download with no retrys's
-    protected HttpURLConnection extractNormal(URL source) throws IOException {
+    private HttpURLConnection extractNormal(URL source) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) source.openConnection();
 
         urlConnection.setConnectTimeout(Constants.WGET_CONNECT_TIMEOUT);
@@ -237,7 +244,7 @@ public class URLInfo extends BrowserInfo {
         return hasRange;
     }
 
-    synchronized public void setHasRange(boolean hasRange) {
+    private synchronized void setHasRange(boolean hasRange) {
         Logs.d("WGet: URLInfo", "setHasRange(): " + hasRange);
         this.hasRange = hasRange;
     }
