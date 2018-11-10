@@ -31,17 +31,17 @@ public class DRunnable implements Runnable {
     private DBundle dBundle;
     private DManager dManager;
 
-    private AtomicBoolean mStop = new AtomicBoolean(false);
-    private AtomicBoolean mFinished = new AtomicBoolean(false);
-    private DProgress mDProgress;
-    private DownloadInfo mDInfo;
+    private AtomicBoolean stop = new AtomicBoolean(false);
+    private AtomicBoolean finished = new AtomicBoolean(false);
+    private DProgress dProgress;
+    private DownloadInfo dInfo;
 
-    private BlockingQueue<Job> mJobQueue;
+    private BlockingQueue<Job> jobQueue;
 
-    private Job mCurrentJob;
-    private DState mLastDState = DState.QUEUED; // used to display in activity;
+    private Job currentJob;
+    private DState lastDState = DState.QUEUED; // used to display in activity;
 
-    private long mLastTimestamp;
+    private long lastTimestamp;
 
     @Nullable
     private Thread currentThread;
@@ -73,19 +73,19 @@ public class DRunnable implements Runnable {
     }
 
     void stopDownload() {
-        mStop.set(true);
+        stop.set(true);
         if (currentThread != null)
             currentThread.interrupt();
     }
 
     DState getState() {
-        return mLastDState;
+        return lastDState;
     }
 
     @Override
     public void run() {
 
-        if (mStop.get())
+        if (stop.get())
             return;
 
         setCurrentThread(Thread.currentThread());
@@ -93,24 +93,24 @@ public class DRunnable implements Runnable {
 
         try {
 
-            mDProgress = new DProgress(dBundle);
+            dProgress = new DProgress(dBundle);
 
-            mJobQueue = dBundle.getJobQueue();
+            jobQueue = dBundle.getJobQueue();
 
             doNextJob();
 
         } catch (Exception e) {
-            mStop.set(true);
+            stop.set(true);
         }
     }
 
     private void doNextJob() throws Exception {
 
-        while ((mCurrentJob = mJobQueue.poll()) != null) {
+        while ((currentJob = jobQueue.poll()) != null) {
 
-            Logger.d("DRunnable", "doNextJob(): " + mCurrentJob);
+            Logger.d("DRunnable", "doNextJob(): " + currentJob);
 
-            switch (mCurrentJob) {
+            switch (currentJob) {
                 case PARSE:
                     updateYtUrls();
                     break;
@@ -137,10 +137,10 @@ public class DRunnable implements Runnable {
     }
 
     private String getTableName() {
-        if (mCurrentJob == null)
+        if (currentJob == null)
             return dBundle.isAudioOnly() ? DInfoHelper.TABLE_AUDIO : DInfoHelper.TABLE_VIDEO;
 
-        switch (mCurrentJob) {
+        switch (currentJob) {
             case PARSE:
                 return dBundle.isAudioOnly() ? DInfoHelper.TABLE_AUDIO : DInfoHelper.TABLE_VIDEO;
             case VIDEO:
@@ -156,7 +156,7 @@ public class DRunnable implements Runnable {
 
     @NonNull
     private String getDInfoID() {
-        return dBundle.getDownloadUid() + " " + "[" + (mCurrentJob != null ? mCurrentJob.toString().substring(0, 1) : "N") + (dBundle.isTwoPartDownload() ? "|2" : "") + "]"; //NON-NLS
+        return dBundle.getDownloadUid() + " " + "[" + (currentJob != null ? currentJob.toString().substring(0, 1) : "N") + (dBundle.isTwoPartDownload() ? "|2" : "") + "]"; //NON-NLS
     }
 
     private void downloadSubtitles() {
@@ -166,7 +166,7 @@ public class DRunnable implements Runnable {
 
             File file = dBundle.getSubtitleFile();
 
-            new DirectSingleBg(context, dBundle.getSubtitleUrl(), file).downloadPart(mStop);
+            new DirectSingleBg(context, dBundle.getSubtitleUrl(), file).downloadPart(stop);
 
         } catch (Exception e) { //TODO make fatal
             Logger.wtf("DRunnable: Non-Fatal, Critical: downloadSubtitles(): Failed to load subtitles.", e);
@@ -175,7 +175,7 @@ public class DRunnable implements Runnable {
 
     private void download(String url, File target) throws Exception {
 
-       /* while (!mStop.get()) {
+       /* while (!stop.get()) {
             updateProgress(DState.RETRYING);
         }
 
@@ -187,7 +187,7 @@ public class DRunnable implements Runnable {
         Runnable notify = new Runnable() {
             @Override
             public void run() {
-                switch (mDInfo.getState()) {
+                switch (dInfo.getState()) {
                     case QUEUED: //TODO take care
                     case EXTRACTING:
                     case EXTRACTING_DONE:
@@ -206,7 +206,7 @@ public class DRunnable implements Runnable {
                         updateProgress(DState.ERROR);
                         break;
                     case DONE:
-                        DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadUid(), mDInfo.toString(), "DONE");
+                        DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadUid(), dInfo.toString(), "DONE");
                         break;
                 }
             }
@@ -215,21 +215,21 @@ public class DRunnable implements Runnable {
         try {
             DSettings dSettings = dBundle.getDSettings();
 
-            mDInfo = new DownloadInfo(new URL(url));
-            mDInfo.setDInfoID(getDInfoID());
-            mDInfo.setDSettings(dSettings);
-            mDInfo.extract(context, mStop, notify);
-            mDInfo.fromString(notify, DInfoHelper.getInstance(context).getInfoString(getTableName(), dBundle.getDownloadUid()));
+            dInfo = new DownloadInfo(new URL(url));
+            dInfo.setDInfoID(getDInfoID());
+            dInfo.setDSettings(dSettings);
+            dInfo.extract(context, stop, notify);
+            dInfo.fromString(notify, DInfoHelper.getInstance(context).getInfoString(getTableName(), dBundle.getDownloadUid()));
 
-            if (mDInfo.isMultipart()) {
+            if (dInfo.isMultipart()) {
                 Logger.d("WGet", "createDirect(): MultiPart");
-                new DirectMultipart(context, mDInfo, target).download(mStop, notify);
-            } else if (mDInfo.hasRange()) {
+                new DirectMultipart(context, dInfo, target).download(stop, notify);
+            } else if (dInfo.hasRange()) {
                 Logger.d("WGet", "createDirect(): Range");
-                new DirectRange(context, mDInfo, target).download(mStop, notify);
+                new DirectRange(context, dInfo, target).download(stop, notify);
             } else {
                 Logger.d("WGet", "createDirect(): Single");
-                new DirectSingle(context, mDInfo, target).download(mStop, notify);
+                new DirectSingle(context, dInfo, target).download(stop, notify);
             }
 
         } catch (DownloadMultipartError e) {  //TODO improve, backport add suppressed ? + do all wget exception logging
@@ -260,14 +260,14 @@ public class DRunnable implements Runnable {
             throw e;
         } catch (Exception e) {
             updateProgress(DState.ERROR);
-            mStop.set(true);
+            stop.set(true);
 
             Logger.wtf("DRunnable: " + getDInfoID(), e);
 
             throw e;
         }
 
-        if (mDInfo.getState() != State.DONE) {
+        if (dInfo.getState() != State.DONE) {
             updateProgress(DState.ERROR);
             throw new DownloadError("Test: thrown if State != DONE to exit job loop");
         }
@@ -275,11 +275,11 @@ public class DRunnable implements Runnable {
 
     synchronized private void updateProgress(DState dState) {
 
-        boolean bool = System.currentTimeMillis() - mLastTimestamp > Constants.DRUNNABLE_PROGRESS_UPDATE_INTERVAL || mLastDState != dState;
-        if (!mFinished.get() && bool) {
+        boolean bool = System.currentTimeMillis() - lastTimestamp > Constants.DRUNNABLE_PROGRESS_UPDATE_INTERVAL || lastDState != dState;
+        if (!finished.get() && bool) {
             int onGoing = 0;
-            mDProgress.setDState(dState);
-            mDProgress.setShowAudio(dBundle.isTwoPartDownload() && mCurrentJob == Job.AUDIO);
+            dProgress.setDState(dState);
+            dProgress.setShowAudio(dBundle.isTwoPartDownload() && currentJob == Job.AUDIO);
 
             switch (dState) {
                 case QUEUED:
@@ -296,12 +296,12 @@ public class DRunnable implements Runnable {
                     break;
                 case DOWNLOADING:
                     onGoing = 1;
-                    mDProgress.setCount(mDInfo.getCount());
-                    mDProgress.setLength(mDInfo.getLength() != null ? mDInfo.getLength() : 0);
-                    mDProgress.setAvgSpeed(mDInfo.getSpeedInfo().getAverageSpeed());
-                    mDProgress.setCurrentSpeed(mDInfo.getSpeedInfo().getCurrentSpeed());
-                    mDProgress.setThreadCount(activeThreadCount());
-                    DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadUid(), mDInfo.toString(), "ONGOING");
+                    dProgress.setCount(dInfo.getCount());
+                    dProgress.setLength(dInfo.getLength() != null ? dInfo.getLength() : 0);
+                    dProgress.setAvgSpeed(dInfo.getSpeedInfo().getAverageSpeed());
+                    dProgress.setCurrentSpeed(dInfo.getSpeedInfo().getCurrentSpeed());
+                    dProgress.setThreadCount(activeThreadCount());
+                    DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadUid(), dInfo.toString(), "ONGOING");
                     break;
                 case COMPLETE:
                     //if two part, update total count and size/length. this part is added quite later
@@ -317,8 +317,8 @@ public class DRunnable implements Runnable {
                         count += DInfoHelper.getCountFromInfoString(videoStr);
                         count += DInfoHelper.getCountFromInfoString(audioStr);
 
-                        mDProgress.setLength(length);
-                        mDProgress.setCount(count);
+                        dProgress.setLength(length);
+                        dProgress.setCount(count);
                         //TODO instead of sum of two files, should we just update content length in dbundle table with filesize? that way encoding one also be supported.
                     } //if encoding is supported. can update content length of newly encoded file.
 
@@ -329,31 +329,31 @@ public class DRunnable implements Runnable {
                 case MUX_ERROR:
                 case ENCODE_ERROR:
                     DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadUid(), dState.toString());
-                    mFinished.set(true);
+                    finished.set(true);
                     break;
             }
 
-            if (mFinished.get()) {
+            if (finished.get()) {
 
-                if (mLastDState != DState.COMPLETE && mLastDState != DState.ERROR && mLastDState != DState.STOPPED && mLastDState != DState.MUX_ERROR && mLastDState != DState.ENCODE_ERROR) {
+                if (lastDState != DState.COMPLETE && lastDState != DState.ERROR && lastDState != DState.STOPPED && lastDState != DState.MUX_ERROR && lastDState != DState.ENCODE_ERROR) {
                     setCurrentThread(null);
                     Thread.interrupted();
-                    progressUpdate(onGoing == 1 ? DService.MESSAGE_PROGRESS_ONGOING : DService.MESSAGE_PROGRESS_ENDED, mDProgress);
+                    progressUpdate(onGoing == 1 ? DService.MESSAGE_PROGRESS_ONGOING : DService.MESSAGE_PROGRESS_ENDED, dProgress);
 
                     dManager.removeFromQueue(this);
                 }
 
             } else
-                progressUpdate(onGoing, mDProgress);
+                progressUpdate(onGoing, dProgress);
 
-            mLastDState = dState;
-            mLastTimestamp = System.currentTimeMillis();
+            lastDState = dState;
+            lastTimestamp = System.currentTimeMillis();
         }
     }
 
     private String activeThreadCount() {
-        if (mDInfo.isMultipart()) {
-            List<Part> arrayList = mDInfo.getPartList();
+        if (dInfo.isMultipart()) {
+            List<Part> arrayList = dInfo.getPartList();
             int running = 0;
             for (Part part : arrayList) {
                 if (part.getState().equals(State.DOWNLOADING) || part.getState().equals(State.RETRYING))
@@ -362,7 +362,7 @@ public class DRunnable implements Runnable {
             }
             if (running == 0)
                 return null;
-            return "[" + running + "/" + mDInfo.getDSettings().getThreadCount() + "]";
+            return "[" + running + "/" + dInfo.getDSettings().getThreadCount() + "]";
         }
         return null;
     }

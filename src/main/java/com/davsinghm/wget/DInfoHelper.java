@@ -32,7 +32,7 @@ public class DInfoHelper extends SQLiteOpenHelper {
 
     private static DInfoHelper sInstance;
 
-    private SQLiteDatabase mDatabase;
+    private SQLiteDatabase database;
 
     private DInfoHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -55,8 +55,8 @@ public class DInfoHelper extends SQLiteOpenHelper {
     }
 
     public synchronized void open() throws SQLException {
-        if (mDatabase == null || !mDatabase.isOpen())
-            mDatabase = getWritableDatabase();
+        if (database == null || !database.isOpen())
+            database = getWritableDatabase();
     }
 
     public synchronized void addInfo(String TABLE, String id, String string, String state) {
@@ -68,9 +68,9 @@ public class DInfoHelper extends SQLiteOpenHelper {
         info.put(COLUMN_STATE, state);
 
         if (checkInfoExists(TABLE, id))
-            mDatabase.update(TABLE, info, COLUMN_ID + "=?", new String[]{id});
+            database.update(TABLE, info, COLUMN_ID + "=?", new String[]{id});
         else
-            mDatabase.insert(TABLE, null, info);
+            database.insert(TABLE, null, info);
 
     }
 
@@ -82,9 +82,9 @@ public class DInfoHelper extends SQLiteOpenHelper {
         info.put(COLUMN_STRING, string);
 
         if (checkInfoExists(TABLE, id))
-            mDatabase.update(TABLE, info, COLUMN_ID + "=?", new String[]{id});
+            database.update(TABLE, info, COLUMN_ID + "=?", new String[]{id});
         else
-            mDatabase.insert(TABLE, null, info);
+            database.insert(TABLE, null, info);
 
     }
 
@@ -96,16 +96,16 @@ public class DInfoHelper extends SQLiteOpenHelper {
         info.put(COLUMN_STATE, state);
 
         if (checkInfoExists(TABLE, id))
-            mDatabase.update(TABLE, info, COLUMN_ID + "=?", new String[]{id});
+            database.update(TABLE, info, COLUMN_ID + "=?", new String[]{id});
         else
-            mDatabase.insert(TABLE, null, info);
+            database.insert(TABLE, null, info);
     }
 
     @Nullable
     public synchronized String getInfoString(String TABLE, String id) {
         open();
 
-        Cursor cursor = mDatabase.query(TABLE,
+        Cursor cursor = database.query(TABLE,
                 new String[]{COLUMN_STRING}, COLUMN_ID + "=?", new String[]{id}, null, null, null);
         if (cursor.getCount() <= 0)
             return null;
@@ -124,7 +124,7 @@ public class DInfoHelper extends SQLiteOpenHelper {
     public synchronized String getInfoState(String TABLE, String id) {
         open();
 
-        Cursor cursor = mDatabase.query(TABLE,
+        Cursor cursor = database.query(TABLE,
                 new String[]{COLUMN_STATE}, COLUMN_ID + "=?", new String[]{id}, null, null, null);
         if (cursor.getCount() <= 0)
             return null;
@@ -167,7 +167,7 @@ public class DInfoHelper extends SQLiteOpenHelper {
         open();
 
         HashMap<String, TempDInfo> hashMap = new HashMap<>();
-        Cursor cursor = mDatabase.query(table,
+        Cursor cursor = database.query(table,
                 new String[]{COLUMN_ID, COLUMN_STRING, COLUMN_STATE}, null, null, null, null, null);
 
         cursor.moveToFirst();
@@ -214,13 +214,13 @@ public class DInfoHelper extends SQLiteOpenHelper {
 
     public synchronized void deleteInfo(String id) {
         open();
-        mDatabase.delete(TABLE_VIDEO, COLUMN_ID + "=?", new String[]{id});
-        mDatabase.delete(TABLE_AUDIO, COLUMN_ID + "=?", new String[]{id});
+        database.delete(TABLE_VIDEO, COLUMN_ID + "=?", new String[]{id});
+        database.delete(TABLE_AUDIO, COLUMN_ID + "=?", new String[]{id});
     }
 
     public synchronized boolean checkInfoExists(String TABLE, String downloadID) {
         open();
-        Cursor cursor = mDatabase.query(TABLE, new String[]{COLUMN_ID}, COLUMN_ID + "=?", new String[]{downloadID}, null, null, null);
+        Cursor cursor = database.query(TABLE, new String[]{COLUMN_ID}, COLUMN_ID + "=?", new String[]{downloadID}, null, null, null);
         boolean b = cursor.getCount() > 0;
         cursor.close();
         return b;

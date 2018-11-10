@@ -77,7 +77,7 @@ public class DManager {
 
         synchronized (sInstance) {
             int i = sInstance.mTaskWorkQueue.size();
-            Logs.d("DManager", "getDownloadCount(): invoked, return " + i);
+            Logger.d("DManager", "getDownloadCount(): invoked, return " + i);
             return i;
         }
     }*/
