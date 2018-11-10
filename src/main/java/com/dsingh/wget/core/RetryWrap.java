@@ -2,7 +2,7 @@ package com.dsingh.wget.core;
 
 import android.content.Context;
 
-import com.dsingh.wget.Logs;
+import com.dsingh.wget.Logger;
 import com.dsingh.wget.NetworkUtils;
 import com.dsingh.wget.core.info.ex.DownloadError;
 import com.dsingh.wget.core.info.ex.DownloadIOCodeError;
@@ -82,21 +82,21 @@ public class RetryWrap {
                 try {
                     return wrap.download();
                 } catch (SocketException | UnknownHostException | InterruptedIOException | HttpRetryException | ProtocolException | EOFException | SSLException e) {
-                    Logs.w("RetryWrap: run()", "SUIHPES, throw DownloadRetry(e)", e);
+                    Logger.w("RetryWrap: run()", "SUIHPES, throw DownloadRetry(e)", e);
                     throw new DownloadRetry(e);
                 } catch (FileNotFoundException e) {
                     throw new DownloadError(e);
                 } catch (RuntimeException e) {
 
                     if (!NetworkUtils.isNetworkAvailable(wrap.getContext())) {
-                        Logs.w("RetryWrap: run()", "throw DownloadRetry(e)", e);
+                        Logger.w("RetryWrap: run()", "throw DownloadRetry(e)", e);
                         throw new DownloadRetry(e);
                     }
 
                     throw e;
                 } catch (IOException e) {
                     if (e.getMessage().startsWith("unexpected end of stream")) { //NON-NLS
-                        Logs.w("RetryWrap: run()", "Unexpected EOF, throw DownloadRetry(e)", e);
+                        Logger.w("RetryWrap: run()", "Unexpected EOF, throw DownloadRetry(e)", e);
                         throw new DownloadRetry(e);
                     }
                     throw new DownloadIOError(e);

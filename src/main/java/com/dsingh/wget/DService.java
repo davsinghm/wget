@@ -40,6 +40,10 @@ public abstract class DService extends Service {
         startForeground(getForegroundNotificationId(), getForegroundNotification());
     }
 
+    public static void setLoggerCallback(Logger.Callback callback) {
+        Logger.callback = callback;
+    }
+
     public abstract void onRepeatedBundleAdded(DBundle dBundle);
 
     public abstract void onBundleQueued(DBundle dBundle);
@@ -74,7 +78,7 @@ public abstract class DService extends Service {
         DBundle dBundle = intent.getParcelableExtra(EXTRA_DBUNDLE);
 
         if (dBundle != null) {
-            Logs.d("DService: onStartCommand()", "Got DBundle: " + dBundle.getDownloadUid());
+            Logger.d("DService: onStartCommand()", "Got DBundle: " + dBundle.getDownloadUid());
 
             if (dManager.queueDownload(dBundle))
                 onBundleQueued(dBundle);
@@ -89,7 +93,7 @@ public abstract class DService extends Service {
     public void onDestroy() {
         super.onDestroy();
 
-        Logs.w("DService", "onDestroy(): invoked");
+        Logger.w("DService", "onDestroy(): invoked");
 
         dManager.shutdown();
 

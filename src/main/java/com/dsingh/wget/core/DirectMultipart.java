@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Process;
 
 import com.dsingh.wget.Constants;
-import com.dsingh.wget.Logs;
+import com.dsingh.wget.Logger;
 import com.dsingh.wget.core.info.DownloadInfo;
 import com.dsingh.wget.core.info.Part;
 import com.dsingh.wget.core.info.State;
@@ -51,11 +51,11 @@ public class DirectMultipart extends Direct {
             long end = part.getEnd();
 
             String partID = "Part " + (part.getNumber() + 1) + "/" + getInfo().getPartList().size() + ": "; //NON-NLS
-            Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", partID + "start: " + part.getStart() + ", end: " + part.getEnd() + ", " + part.getCount() + " of " + part.getLength() + " already downloaded");
+            Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", partID + "start: " + part.getStart() + ", end: " + part.getEnd() + ", " + part.getCount() + " of " + part.getLength() + " already downloaded");
 
             // fully downloaded already?
             if (end - start + 1 == 0) {
-                Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", partID + "Fully downloaded already");
+                Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", partID + "Fully downloaded already");
                 return;
             }
 
@@ -88,7 +88,7 @@ public class DirectMultipart extends Direct {
 
                 long partEnd = part.getLength() - part.getCount();
                 if (read > partEnd) {
-                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", partID + "LocalStop = true | read: " + read + ", partEnd: " + partEnd);
+                    Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", partID + "LocalStop = true | read: " + read + ", partEnd: " + partEnd);
                     read = (int) partEnd;
                     localStop = true;
                 }
@@ -111,7 +111,7 @@ public class DirectMultipart extends Direct {
                     break;
             }
 
-            Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", partID + "COMPLETE | count: " + part.getCount() + ", length: " + part.getLength() + " from " + part.getStart() + "-" + part.getEnd());
+            Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", partID + "COMPLETE | count: " + part.getCount() + ", length: " + part.getLength() + " from " + part.getStart() + "-" + part.getEnd());
 
             if (part.getCount() != part.getLength())
                 throw new DownloadRetry("EOF before end of part");
@@ -204,14 +204,14 @@ public class DirectMultipart extends Direct {
         long minPartLength = getInfo().getDSettings().getMinPartLength();
         int threadCount = getInfo().getDSettings().getThreadCount();
         int c = runningPartCount();
-        Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): runningPartCount: " + c + ", threadCount: " + threadCount + ", entryingLoop: " + (c < threadCount && c > 0));
+        Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): runningPartCount: " + c + ", threadCount: " + threadCount + ", entryingLoop: " + (c < threadCount && c > 0));
         if (c < threadCount && c > 0)
             for (Part part : getInfo().getSortedPartList()) {
                 int listSize = getInfo().getPartList().size();
                 State state = part.getState();
                 if (state.equals(State.DOWNLOADING) || state.equals(State.RETRYING)) {
 
-                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): -- Trying to help Part: " + (part.getNumber() + 1) + " (Currently: " + state + ")");
+                    Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): -- Trying to help Part: " + (part.getNumber() + 1) + " (Currently: " + state + ")");
 
                     Part part1 = new Part();
                     part1.setState(State.QUEUED);
@@ -222,7 +222,7 @@ public class DirectMultipart extends Direct {
                     long end = part.getEnd();
                     long minSecs = getInfo().getSpeedInfo().getAverageSpeed() * Constants.MT_MIN_SEC_SPEED_MULTIPLE_FOR_IDM;
                     if (left < minSecs || left <= 0 || left < minPartLength) {
-                        Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- Skipping help Part: " + (part.getNumber() + 1) + " left: " + left + ", min: " + minSecs + " [left: " + (left / 1024) + "kb, min: " + (minSecs / 1024) + "kb, minPart: " + (minPartLength / 1024) + "kb]");
+                        Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- Skipping help Part: " + (part.getNumber() + 1) + " left: " + left + ", min: " + minSecs + " [left: " + (left / 1024) + "kb, min: " + (minSecs / 1024) + "kb, minPart: " + (minPartLength / 1024) + "kb]");
                         continue;
                     }
                     part.setEnd(start - 1);
@@ -231,8 +231,8 @@ public class DirectMultipart extends Direct {
 
                     getInfo().getPartList().add(part1);
 
-                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- Helping Part: " + (part.getNumber() + 1) + " left: " + left + ", min: " + minSecs + " [left: " + (left / 1024) + "kb, min: " + (minSecs / 1024) + "kb, minPart: " + (minPartLength / 1024) + "kb]");
-                    Logs.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- NEW PART - start: " + part1.getStart() + " [" + (part1.getStart() / 1024) + "kb], end: " + part1.getEnd() + " [" + (part1.getEnd() / 1024) + "kb], length: " + part1.getLength() + " [" + (part1.getLength() / 1024) + "kb]");
+                    Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- Helping Part: " + (part.getNumber() + 1) + " left: " + left + ", min: " + minSecs + " [left: " + (left / 1024) + "kb, min: " + (minSecs / 1024) + "kb, minPart: " + (minPartLength / 1024) + "kb]");
+                    Logger.d("WGet: " + getInfo().getDInfoID() + ": IDM", "collaborate(): ---- NEW PART - start: " + part1.getStart() + " [" + (part1.getStart() / 1024) + "kb], end: " + part1.getEnd() + " [" + (part1.getEnd() / 1024) + "kb], length: " + part1.getLength() + " [" + (part1.getLength() / 1024) + "kb]");
 
                     break;
                 }
@@ -290,13 +290,13 @@ public class DirectMultipart extends Direct {
         getInfo().setState(State.DOWNLOADING);
         notify.run();
 
-        Logs.d("WGet: " + getInfo().getDInfoID() + ": download()", "DownloadInfo length: " + getInfo().getLength());
+        Logger.d("WGet: " + getInfo().getDInfoID() + ": download()", "DownloadInfo length: " + getInfo().getLength());
 
         try {
             while (!done(stop)) {
                 Part part = getPart();
                 if (part != null) {
-                    Logs.d("WGet: " + getInfo().getDInfoID() + ": download()", "Adding new part: " + (part.getNumber() + 1));
+                    Logger.d("WGet: " + getInfo().getDInfoID() + ": download()", "Adding new part: " + (part.getNumber() + 1));
                     downloadWorker(part, stop, notify);
                 } else // we have no parts left. wait until task ends and check again if we have to retry. we have to check if last part back to queue in case of RETRY state
                     limitThreadPool.waitUntilNextTaskEnds();
@@ -306,7 +306,7 @@ public class DirectMultipart extends Direct {
 
                 // if we start to receive errors. stop adding new tasks and wait until all active tasks be emptied
                 if (fatal()) {
-                    Logs.e("WGet: " + getInfo().getDInfoID() + ": DirectMP", "Fatal is true");
+                    Logger.e("WGet: " + getInfo().getDInfoID() + ": DirectMP", "Fatal is true");
                     limitThreadPool.waitUntilTermination();
 
                     // check if all parts finished with interrupted, throw one interruption
@@ -321,13 +321,13 @@ public class DirectMultipart extends Direct {
                             interrupted = false;
                         }
                         if (interrupted) {
-                            Logs.e("WGet: " + getInfo().getDInfoID() + ": DirectMP", "Fatal! Any of Part is Interrupted, throw DownloadInterruptedError()");
+                            Logger.e("WGet: " + getInfo().getDInfoID() + ": DirectMP", "Fatal! Any of Part is Interrupted, throw DownloadInterruptedError()");
                             throw new DownloadInterruptedError("Multipart: All interrupted");
                         }
                     }
 
                     // ok all thread stopped. now throw the exception and let app deal with the errors
-                    Logs.e("WGet: " + getInfo().getDInfoID() + ": DirectMP", "Fatal! None of Part is Interrupted though, throw DownloadMultipartError()");
+                    Logger.e("WGet: " + getInfo().getDInfoID() + ": DirectMP", "Fatal! None of Part is Interrupted though, throw DownloadMultipartError()");
 
                     throw new DownloadMultipartError(getInfo());
                 }

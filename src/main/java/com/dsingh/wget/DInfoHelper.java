@@ -7,8 +7,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.dsingh.wget.DState;
-
 import java.util.HashMap;
 
 import androidx.annotation.Nullable;
@@ -42,7 +40,7 @@ public class DInfoHelper extends SQLiteOpenHelper {
 
     private static synchronized void createInstance(Context context) {
         sInstance = new DInfoHelper(context);
-    }/**/
+    }
 
     public static synchronized DInfoHelper getInstance(Context context) {
         if (sInstance == null)

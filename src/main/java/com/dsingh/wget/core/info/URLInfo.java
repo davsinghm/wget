@@ -3,7 +3,7 @@ package com.dsingh.wget.core.info;
 import android.content.Context;
 
 import com.dsingh.wget.Constants;
-import com.dsingh.wget.Logs;
+import com.dsingh.wget.Logger;
 import com.dsingh.wget.core.RetryWrap;
 import com.dsingh.wget.core.info.ex.DownloadInterruptedError;
 import com.dsingh.wget.core.info.ex.DownloadMoved;
@@ -37,7 +37,7 @@ public class URLInfo extends BrowserInfo {
     }
 
     void extract(final Context context, AtomicBoolean stop, final Runnable notify) {
-        Logs.d("WGet: URLInfo", "extract(): invoked");
+        Logger.d("WGet: URLInfo", "extract(): invoked");
         try {
             HttpURLConnection urlConnection = RetryWrap.run(stop, new RetryWrap.Wrap<HttpURLConnection>() {
                 URL url = source;
@@ -56,10 +56,10 @@ public class URLInfo extends BrowserInfo {
                     try {
                         return extractRange(url);
                     } catch (DownloadRetry | DownloadMoved e) {
-                        Logs.e("WGet: URLInfo", "extract(): " + e.toString());
+                        Logger.e("WGet: URLInfo", "extract(): " + e.toString());
                         throw e;
                     } catch (RuntimeException e) {
-                        Logs.e("WGet: URLInfo", "extract(): " + e.toString());
+                        Logger.e("WGet: URLInfo", "extract(): " + e.toString());
                         return extractNormal(url);
                     }
                 }
@@ -100,14 +100,14 @@ public class URLInfo extends BrowserInfo {
             notify.run();
 
         } catch (DownloadInterruptedError e) {
-            Logs.e("WGet: URLInfo", "extract(): " + e.toString());
+            Logger.e("WGet: URLInfo", "extract(): " + e.toString());
             setState(State.STOP, e);
             notify.run();
 
             throw e;
 
         } catch (RuntimeException e) {
-            Logs.e("WGet: URLInfo", "extract(): " + e.toString());
+            Logger.e("WGet: URLInfo", "extract(): " + e.toString());
             setState(State.ERROR, e);
             notify.run();
 
@@ -120,7 +120,7 @@ public class URLInfo extends BrowserInfo {
     }
 
     synchronized public void setEmpty(boolean isEmpty) {
-        Logs.d("WGet: URLInfo", "setEmpty(): " + isEmpty);
+        Logger.d("WGet: URLInfo", "setEmpty(): " + isEmpty);
         this.isEmpty = isEmpty;
     }
 
@@ -245,7 +245,7 @@ public class URLInfo extends BrowserInfo {
     }
 
     private synchronized void setHasRange(boolean hasRange) {
-        Logs.d("WGet: URLInfo", "setHasRange(): " + hasRange);
+        Logger.d("WGet: URLInfo", "setHasRange(): " + hasRange);
         this.hasRange = hasRange;
     }
 

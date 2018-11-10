@@ -5,6 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 public class NetworkUtils {
+
     public static boolean isNetworkAvailable(Context context) {
         if (context == null)
             return true;
@@ -15,4 +16,5 @@ public class NetworkUtils {
 
         return networkInfo != null && networkInfo.isConnected();
     }
+
 }

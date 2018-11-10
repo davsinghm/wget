@@ -108,7 +108,7 @@ public class DRunnable implements Runnable {
 
         while ((mCurrentJob = mJobQueue.poll()) != null) {
 
-            Logs.d("DRunnable", "doNextJob(): " + mCurrentJob);
+            Logger.d("DRunnable", "doNextJob(): " + mCurrentJob);
 
             switch (mCurrentJob) {
                 case PARSE:
@@ -131,7 +131,7 @@ public class DRunnable implements Runnable {
             }
         }
 
-        Logs.d("DRunnable", "doNextJob(): out of loop");
+        Logger.d("DRunnable", "doNextJob(): out of loop");
 
         updateProgress(DState.COMPLETE);
     }
@@ -160,8 +160,8 @@ public class DRunnable implements Runnable {
     }
 
     private void downloadSubtitles() {
-        try {
 
+        try {
             updateProgress(DState.EXTRACTING);
 
             File file = dBundle.getSubtitleFile();
@@ -169,7 +169,7 @@ public class DRunnable implements Runnable {
             new DirectSingleBg(context, dBundle.getSubtitleUrl(), file).downloadPart(mStop);
 
         } catch (Exception e) { //TODO make fatal
-            Logs.wtf("DRunnable: Non-Fatal, Critical: downloadSubtitles(): Failed to load subtitles.", e);
+            Logger.wtf("DRunnable: Non-Fatal, Critical: downloadSubtitles(): Failed to load subtitles.", e);
         }
     }
 
@@ -222,13 +222,13 @@ public class DRunnable implements Runnable {
             mDInfo.fromString(notify, DInfoHelper.getInstance(context).getInfoString(getTableName(), dBundle.getDownloadUid()));
 
             if (mDInfo.isMultipart()) {
-                Logs.d("WGet", "createDirect(): MultiPart");
+                Logger.d("WGet", "createDirect(): MultiPart");
                 new DirectMultipart(context, mDInfo, target).download(mStop, notify);
             } else if (mDInfo.hasRange()) {
-                Logs.d("WGet", "createDirect(): Range");
+                Logger.d("WGet", "createDirect(): Range");
                 new DirectRange(context, mDInfo, target).download(mStop, notify);
             } else {
-                Logs.d("WGet", "createDirect(): Single");
+                Logger.d("WGet", "createDirect(): Single");
                 new DirectSingle(context, mDInfo, target).download(mStop, notify);
             }
 
@@ -237,32 +237,32 @@ public class DRunnable implements Runnable {
             if (e.getInfo() != null && e.getInfo().getPartList() != null)
                 for (Part p : e.getInfo().getPartList()) {
                     String partID = "Part " + (p.getNumber() + 1) + "/" + e.getInfo().getPartList().size() + ": "; //NON-NLS
-                    Logs.e("DRunnable: " + getDInfoID(), partID + "ERROR | start: " + p.getStart() + ", end: " + p.getEnd() + ", count: " + p.getCount() + ", length: " + p.getLength());
+                    Logger.e("DRunnable: " + getDInfoID(), partID + "ERROR | start: " + p.getStart() + ", end: " + p.getEnd() + ", count: " + p.getCount() + ", length: " + p.getLength());
                     Throwable ee = p.getException();
                     if (ee != null) {
-                        Logs.e("DRunnable: " + getDInfoID() + ": Part: " + (p.getNumber() + 1) + " : PartException", ee.toString());
+                        Logger.e("DRunnable: " + getDInfoID() + ": Part: " + (p.getNumber() + 1) + " : PartException", ee.toString());
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
                             e.addSuppressed(ee);
                         StackTraceElement[] steS = ee.getStackTrace();
                         for (StackTraceElement ste : steS)
-                            Logs.e("DRunnable: " + getDInfoID() + ": PartException", ste.toString());
-                        Logs.e("DRunnable: " + getDInfoID() + ": PartException", "End of StackTraceElement (Part: " + (p.getNumber() + 1) + ")\n");
+                            Logger.e("DRunnable: " + getDInfoID() + ": PartException", ste.toString());
+                        Logger.e("DRunnable: " + getDInfoID() + ": PartException", "End of StackTraceElement (Part: " + (p.getNumber() + 1) + ")\n");
                     }
                 }
-            Logs.wtf("DRunnable: " + getDInfoID(), e);
+            Logger.wtf("DRunnable: " + getDInfoID(), e);
 
             throw e;
 
         } catch (DownloadInterruptedError e) {
             updateProgress(DState.STOPPED);
-            Logs.w("DRunnable: " + getDInfoID(), e);
+            Logger.w("DRunnable: " + getDInfoID(), e);
 
             throw e;
         } catch (Exception e) {
             updateProgress(DState.ERROR);
             mStop.set(true);
 
-            Logs.wtf("DRunnable: " + getDInfoID(), e);
+            Logger.wtf("DRunnable: " + getDInfoID(), e);
 
             throw e;
         }
@@ -358,7 +358,7 @@ public class DRunnable implements Runnable {
             for (Part part : arrayList) {
                 if (part.getState().equals(State.DOWNLOADING) || part.getState().equals(State.RETRYING))
                     running++;
-                Logs.w("DRunnable: " + getDInfoID() + ": Part " + (part.getNumber() + 1) + "/" + arrayList.size() + ", PartState", part.getState().toString() + ", Count: " + (part.getCount() / 1024) + "kb, Length: " + (part.getLength() / 1024) + "kb");
+                Logger.w("DRunnable: " + getDInfoID() + ": Part " + (part.getNumber() + 1) + "/" + arrayList.size() + ", PartState", part.getState().toString() + ", Count: " + (part.getCount() / 1024) + "kb, Length: " + (part.getLength() / 1024) + "kb");
             }
             if (running == 0)
                 return null;
@@ -372,7 +372,6 @@ public class DRunnable implements Runnable {
         updateProgress(DState.MUXING);
 
         try {
-
             dBundle.muxAllFiles();
 
         } catch (InterruptedException | InterruptedIOException e) {

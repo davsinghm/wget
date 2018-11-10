@@ -42,7 +42,7 @@ public class DManager {
     }
 
     private void initialize(int poolSize) {
-        Logs.d("DManager: initPool()", "invoked");
+        Logger.d("DManager: initPool()", "invoked");
 
         runnableQueue = new LinkedBlockingQueue<>();
         workQueue = new LinkedBlockingQueue<>();
@@ -51,7 +51,7 @@ public class DManager {
 
     void shutdown() {
 
-        Logs.w("DManager", "shutdown(): invoked");
+        Logger.w("DManager", "shutdown(): invoked");
 
         handler = null;
 
@@ -84,7 +84,7 @@ public class DManager {
 
     void cancelDownload(String downloadUid) {
 
-        Logs.d("DManager", "cancelDownload(): invoked, UID: " + downloadUid);
+        Logger.d("DManager", "cancelDownload(): invoked, UID: " + downloadUid);
 
         for (DRunnable dRunnable : runnableQueue) {
             if (dRunnable.getDownloadUid().equals(downloadUid)) {
@@ -103,7 +103,7 @@ public class DManager {
 
     void cancelAll() {
 
-        Logs.d("DManager", "cancelAll(): invoked");
+        Logger.d("DManager", "cancelAll(): invoked");
 
         for (DRunnable dRunnable : runnableQueue) {
             dRunnable.stopDownload();
@@ -123,11 +123,11 @@ public class DManager {
     boolean removeFromQueue(DRunnable dRunnable) {
 
         boolean taskQ = runnableQueue.remove(dRunnable);
-        Logs.d("DManager: removeDTaskFromQueue()", "invoked. Param - DTask:UID: " + dRunnable.getDownloadUid() + " ? removed: " + taskQ);
+        Logger.d("DManager: removeDTaskFromQueue()", "invoked. Param - DTask:UID: " + dRunnable.getDownloadUid() + " ? removed: " + taskQ);
 
         if (taskQ)
             if (runnableQueue.size() == 0) {
-                Logs.d("DManager", "stopService(): DManager.getDownloadCount() == 0");
+                Logger.d("DManager", "stopService(): DManager.getDownloadCount() == 0");
 
                 if (handler != null)
                     handler.obtainMessage(DService.MESSAGE_SHUTDOWN).sendToTarget();

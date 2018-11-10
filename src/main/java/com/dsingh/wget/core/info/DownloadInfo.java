@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.dsingh.wget.Constants;
 import com.dsingh.wget.DSettings;
-import com.dsingh.wget.Logs;
+import com.dsingh.wget.Logger;
 import com.dsingh.wget.core.SpeedInfo;
 
 import java.net.URL;
@@ -31,7 +31,7 @@ public class DownloadInfo extends URLInfo {
 
     @Override
     public void extract(final Context context, final AtomicBoolean stop, final Runnable notify) {
-        Logs.d("WGet: DownloadInfo: " + getDInfoID(), "extract(): invoked");
+        Logger.d("WGet: DownloadInfo: " + getDInfoID(), "extract(): invoked");
         super.extract(context, stop, notify);
     }
 
@@ -111,7 +111,7 @@ public class DownloadInfo extends URLInfo {
     public void enableMultipart(Runnable notify) {
 
         if (isEmpty()) {
-            Logs.d("WGet: DownloadInfo: " + getDInfoID(), "enableMultipart(): isEmpty: true, throwing RuntimeException");
+            Logger.d("WGet: DownloadInfo: " + getDInfoID(), "enableMultipart(): isEmpty: true, throwing RuntimeException");
             setState(State.ERROR);
             notify.run();
 
@@ -119,7 +119,7 @@ public class DownloadInfo extends URLInfo {
         }
 
         if (!hasRange()) {
-            Logs.d("WGet: DownloadInfo: " + getDInfoID(), "enableMultipart(): hasRange: false, reporting non-fatal ex & skipping enable.");
+            Logger.d("WGet: DownloadInfo: " + getDInfoID(), "enableMultipart(): hasRange: false, reporting non-fatal ex & skipping enable.");
             //TODO Crash.lytics().logException(new DownloadMultipartError("Server doesn't support Range. Download as Single."));
             return;
         }
@@ -136,7 +136,7 @@ public class DownloadInfo extends URLInfo {
     }
 
     public void enableAxetMP() {
-        Logs.d("WGet: DownloadInfo: " + getDInfoID(), "enableAxetMP(): invoked");
+        Logger.d("WGet: DownloadInfo: " + getDInfoID(), "enableAxetMP(): invoked");
 
         long partLength = dSettings.getMaxPartLength();
         long noOfParts = getLength() / partLength + 1;
@@ -168,7 +168,7 @@ public class DownloadInfo extends URLInfo {
     }
 
     public void enableClassicMP() {
-        Logs.d("WGet: DownloadInfo: " + getDInfoID(), "enableClassicMP(): invoked");
+        Logger.d("WGet: DownloadInfo: " + getDInfoID(), "enableClassicMP(): invoked");
 
         partList = new ArrayList<>();
 
@@ -208,7 +208,7 @@ public class DownloadInfo extends URLInfo {
 
     public void useDefaultSettings(Runnable notify) {
 
-        Logs.d("WGet: DownloadInfo: " + getDInfoID(), "Using default settings!");
+        Logger.d("WGet: DownloadInfo: " + getDInfoID(), "Using default settings!");
 
         setCount(0);
         partList = null;
@@ -220,10 +220,10 @@ public class DownloadInfo extends URLInfo {
     @SuppressWarnings("HardCodedStringLiteral")
     public void fromString(Runnable notify, String string) { //TODO remove notify from arg
 
-        Logs.d("WGet: DownloadInfo: " + getDInfoID(), "fromString(): invoked | Settings: useMultipart: " + dSettings.useMultipart() + ", threadCount: " + dSettings.getThreadCount() + ", mtStyle: " + dSettings.getMtStyle() + ", minPartLength: " + dSettings.getMinPartLength() + ", maxPartLength: " + dSettings.getMaxPartLength());
+        Logger.d("WGet: DownloadInfo: " + getDInfoID(), "fromString(): invoked | Settings: useMultipart: " + dSettings.useMultipart() + ", threadCount: " + dSettings.getThreadCount() + ", mtStyle: " + dSettings.getMtStyle() + ", minPartLength: " + dSettings.getMinPartLength() + ", maxPartLength: " + dSettings.getMaxPartLength());
 
         if (string == null || !hasRange()) {
-            Logs.d("WGet: DownloadInfo: " + getDInfoID(), "fromString(): String is null || !hasRange(), useDefaultSettings()");
+            Logger.d("WGet: DownloadInfo: " + getDInfoID(), "fromString(): String is null || !hasRange(), useDefaultSettings()");
             useDefaultSettings(notify);
             return;
         }
@@ -270,7 +270,7 @@ public class DownloadInfo extends URLInfo {
 
         } catch (Exception e) {
             useDefaultSettings(notify);
-            Logs.wtf("WGet: DownloadInfo: " + getDInfoID(), "Load settings failed: " + string, e);
+            Logger.wtf("WGet: DownloadInfo: " + getDInfoID(), "Load settings failed: " + string, e);
         }
 
     }
