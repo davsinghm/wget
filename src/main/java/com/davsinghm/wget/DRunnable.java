@@ -39,6 +39,7 @@ public class DRunnable implements Runnable {
     private BlockingQueue<Job> jobQueue;
 
     private Job currentJob;
+    @NonNull
     private DState lastDState = DState.QUEUED; // used to display in activity;
 
     private long lastTimestamp;
@@ -78,6 +79,7 @@ public class DRunnable implements Runnable {
             currentThread.interrupt();
     }
 
+    @NonNull
     DState getState() {
         return lastDState;
     }
@@ -273,7 +275,7 @@ public class DRunnable implements Runnable {
         }
     }
 
-    private synchronized void updateProgress(DState dState) {
+    private synchronized void updateProgress(@NonNull DState dState) {
 
         boolean bool = System.currentTimeMillis() - lastTimestamp > Constants.DRUNNABLE_PROGRESS_UPDATE_INTERVAL || lastDState != dState;
         if (!finished.get() && bool) {

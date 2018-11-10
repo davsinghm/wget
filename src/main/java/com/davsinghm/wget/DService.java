@@ -8,6 +8,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 
+import androidx.annotation.Nullable;
+
 public abstract class DService extends Service {
 
     private Handler handler;
@@ -22,8 +24,11 @@ public abstract class DService extends Service {
     static final int MESSAGE_PROGRESS_ONGOING = 1;
     static final int MESSAGE_SHUTDOWN = 2;
 
-    @Override
-    public IBinder onBind(Intent intent) {
+    @Nullable
+    DState getDState(String downloadUid) {
+        if (dManager != null)
+            return dManager.getDState(downloadUid);
+
         return null;
     }
 
@@ -36,6 +41,8 @@ public abstract class DService extends Service {
         dManager = new DManager(this, getPoolSize());
         dManager.setHandler(handler);
         dManager.setService(this);
+
+        DownloadManager.dService = this;
 
         startForeground(getForegroundNotificationId(), getForegroundNotification());
     }
@@ -95,6 +102,8 @@ public abstract class DService extends Service {
 
         Logger.w("DService", "onDestroy(): invoked");
 
+        DownloadManager.dService = null;
+
         dManager.shutdown();
 
         onDownloadManagerShutdown();
@@ -103,6 +112,11 @@ public abstract class DService extends Service {
     @Override
     public void onLowMemory() {
         super.onLowMemory();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     public abstract void onProgressUpdated(DProgress dProgress, boolean isOnGoing);

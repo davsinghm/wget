@@ -120,6 +120,17 @@ public class DManager {
         }
     }
 
+    @Nullable
+    DState getDState(String downloadUid) {
+
+        for (DRunnable dRunnable : runnableQueue) {
+            if (dRunnable.getDownloadUid().equals(downloadUid))
+                return dRunnable.getState();
+        }
+
+        return null;
+    }
+
     boolean removeFromQueue(DRunnable dRunnable) {
 
         boolean taskQ = runnableQueue.remove(dRunnable);
@@ -140,36 +151,5 @@ public class DManager {
 
         if (handler != null)
             handler.obtainMessage(what, dProgress).sendToTarget();
-    }
-
-    public static DState getDownloadState(Context context, DBundle dBundle) {
-
-        DState dState = getActiveDownloadState(dBundle);
-        if (dState != null)
-            return dState;
-
-        String table = dBundle.isAudioOnly() ? DInfoHelper.TABLE_AUDIO : DInfoHelper.TABLE_VIDEO;
-        String state = DInfoHelper.getInstance(context).getInfoState(table, dBundle.getDownloadUid());
-
-        return DInfoHelper.getInactiveDStateFromString(state);
-    }
-
-    @Nullable
-    public static DState getActiveDownloadState(DBundle dBundle) {
-
-        //TODO
-        /*
-        synchronized (sInstance) {
-            if (isAlive.get()) {
-                DTask[] taskArray = new DTask[sInstance.mTaskWorkQueue.size()];
-                sInstance.mTaskWorkQueue.toArray(taskArray);
-
-                for (DTask task : taskArray)
-                    if (task.getDownloadUid().equals(dBundle.getDownloadUid()))
-                        return task.getDRunnable().getState();
-            }
-        }*/
-
-        return null;
     }
 }

@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.HashMap;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 @SuppressWarnings("HardCodedStringLiteral")
@@ -136,6 +137,7 @@ public class DInfoHelper extends SQLiteOpenHelper {
     }
 
     //this ignores the ONGOING state, as it's checked by DManager, so only inactive states are needed.
+    @NonNull
     public static DState getInactiveDStateFromString(String state) {
         if (state != null)
             switch (state) {
