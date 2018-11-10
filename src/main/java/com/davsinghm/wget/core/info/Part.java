@@ -12,69 +12,69 @@ public class Part implements Comparable<Part> {
     private Throwable exception; // downloading error / retry error
     private int delay; // retrying delay;
 
-    synchronized public long getStart() {
+    public synchronized long getStart() {
         return start;
     }
 
-    synchronized public void setStart(long start) {
+    public synchronized void setStart(long start) {
         this.start = start;
     }
 
-    synchronized public long getEnd() {
+    public synchronized long getEnd() {
         return end;
     }
 
-    synchronized public void setEnd(long end) {
+    public synchronized void setEnd(long end) {
         this.end = end;
     }
 
-    synchronized public int getNumber() {
+    public synchronized int getNumber() {
         return number;
     }
 
-    synchronized public void setNumber(int number) {
+    public synchronized void setNumber(int number) {
         this.number = number;
     }
 
-    synchronized public long getLength() {
+    public synchronized long getLength() {
         return end - start + 1;
     }
 
-    synchronized public long getCount() {
+    public synchronized long getCount() {
         return count;
     }
 
-    synchronized public void setCount(long count) {
+    public synchronized void setCount(long count) {
         this.count = count;
     }
 
-    synchronized public State getState() {
+    public synchronized State getState() {
         return state;
     }
 
-    synchronized public void setState(State state) {
+    public synchronized void setState(State state) {
         this.state = state;
         this.exception = null;
     }
 
-    synchronized public void setState(State state, Throwable e) {
+    public synchronized void setState(State state, Throwable e) {
         this.state = state;
         this.exception = e;
     }
 
-    synchronized public Throwable getException() {
+    public synchronized Throwable getException() {
         return exception;
     }
 
-    synchronized public void setException(Throwable exception) {
+    public synchronized void setException(Throwable exception) {
         this.exception = exception;
     }
 
-    synchronized public int getDelay() {
+    public synchronized int getDelay() {
         return delay;
     }
 
-    synchronized public void setDelay(int delay, Throwable e) {
+    public synchronized void setDelay(int delay, Throwable e) {
         this.state = State.RETRYING;
         this.delay = delay;
         this.exception = e;

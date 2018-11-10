@@ -35,7 +35,7 @@ public class DownloadInfo extends URLInfo {
         super.extract(context, stop, notify);
     }
 
-    synchronized public DSettings getDSettings() {
+    public synchronized DSettings getDSettings() {
         return dSettings;
     }
 
@@ -51,27 +51,27 @@ public class DownloadInfo extends URLInfo {
         this.count = count;
     }
 
-    synchronized public String getDInfoID() {
+    public synchronized String getDInfoID() {
         return dinfoId;
     }
 
-    synchronized public void setDInfoID(String id) {
+    public synchronized void setDInfoID(String id) {
         this.dinfoId = id;
     }
 
-    synchronized public SpeedInfo getSpeedInfo() {
+    public synchronized SpeedInfo getSpeedInfo() {
         return speedInfo;
     }
 
-    synchronized public void updateSpeed() {
+    public synchronized void updateSpeed() {
         getSpeedInfo().step(getCount());
     }
 
-    synchronized public List<Part> getPartList() {
+    public synchronized List<Part> getPartList() {
         return partList;
     }
 
-    synchronized public List<Part> getSortedPartList() {
+    public synchronized List<Part> getSortedPartList() {
         synchronized (getPartList()) {
             if (getPartList() != null)
                 Collections.sort(getPartList(), Part.PartComparator);
@@ -80,7 +80,7 @@ public class DownloadInfo extends URLInfo {
     }
 
     @Override
-    synchronized public State getState() {
+    public synchronized State getState() {
         if (isMultipart()) {
             boolean atLeastOneRetrying = false;
             for (Part part : getPartList()) {
@@ -95,11 +95,11 @@ public class DownloadInfo extends URLInfo {
         return super.getState();
     }
 
-    synchronized public boolean isMultipart() {
+    public synchronized boolean isMultipart() {
         return hasRange() && partList != null;
     }
 
-    synchronized public void updateMultipartCount() {
+    public synchronized void updateMultipartCount() {
         setCount(0);
 
         for (Part p : getPartList())
@@ -235,7 +235,7 @@ public class DownloadInfo extends URLInfo {
             long length = Long.valueOf(ss1[1]);
             if (getLength() != length)
                 throw new IllegalStateException("Non-Critical: Stored length: " + length + " doesn't matches with getLength(): " + getLength()
-                + ". Using default settings, setting count to 0.");
+                        + ". Using default settings, setting count to 0.");
 
             DSettings dSettings = new DSettings();
             dSettings.setMultipart(Boolean.valueOf(ss1[2]));
@@ -305,7 +305,7 @@ public class DownloadInfo extends URLInfo {
         return sb.toString();
     }
 
-    synchronized public void reset() {
+    public synchronized void reset() {
         setCount(0);
         getSpeedInfo().start(0); //TODO verify test
 
@@ -324,7 +324,7 @@ public class DownloadInfo extends URLInfo {
      * @param newSource new source
      * @return true - possible to resume from new location
      */
-    synchronized public boolean resume(DownloadInfo newSource) {
+    public synchronized boolean resume(DownloadInfo newSource) {
         if (!newSource.hasRange())
             return false;
 
@@ -361,7 +361,7 @@ public class DownloadInfo extends URLInfo {
     /**
      * copy resume data from oldSource;
      */
-    synchronized public void copy(DownloadInfo oldSource) {
+    public synchronized void copy(DownloadInfo oldSource) {
         setCount(oldSource.getCount());
         partList = oldSource.partList;
     }

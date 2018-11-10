@@ -9,19 +9,19 @@ public class BrowserInfo {
     private String userAgent = Constants.USER_AGENT;
     private URL referrer;
 
-    synchronized public String getUserAgent() {
+    public synchronized String getUserAgent() {
         return userAgent;
     }
 
-    synchronized public void setUserAgent(String userAgent) {
+    public synchronized void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
 
-    synchronized public URL getReferrer() {
+    public synchronized URL getReferrer() {
         return referrer;
     }
 
-    synchronized public void setReferrer(URL referrer) {
+    public synchronized void setReferrer(URL referrer) {
         this.referrer = referrer;
     }
 }

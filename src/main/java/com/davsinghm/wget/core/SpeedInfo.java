@@ -46,10 +46,10 @@ public class SpeedInfo {
 
     /**
      * Start calculate speed from 'current' bytes downloaded
-     * 
+     *
      * @param current
      */
-    synchronized public void start(long current) {
+    public synchronized void start(long current) {
         Sample s = new Sample(current);
         s.start = true;
         start = s;
@@ -58,10 +58,10 @@ public class SpeedInfo {
 
     /**
      * step download process with 'current' bytes downloaded
-     * 
+     *
      * @param current
      */
-    synchronized public void step(long current) {
+    public synchronized void step(long current) {
         long now = System.currentTimeMillis();
 
         long lastUpdate = getLastUpdate();
@@ -72,10 +72,10 @@ public class SpeedInfo {
 
     /**
      * Current download speed
-     * 
+     *
      * @return bytes per second
      */
-    synchronized public int getCurrentSpeed() {
+    public synchronized int getCurrentSpeed() {
         if (getRowSamples() < 2)
             return 0;
 
@@ -94,10 +94,10 @@ public class SpeedInfo {
 
     /**
      * Average speed from start download
-     * 
+     *
      * @return bytes per second
      */
-    synchronized public int getAverageSpeed() {
+    public synchronized int getAverageSpeed() {
         if (start == null || getRowSamples() < 2)
             return 0;
 
@@ -111,11 +111,11 @@ public class SpeedInfo {
 
     /**
      * Average speed for maximum stepsBack steps
-     * 
+     *
      * @param stepsBack
      * @return bytes per second
      */
-    synchronized public int getAverageSpeed(int stepsBack) {
+    public synchronized int getAverageSpeed(int stepsBack) {
         if (start == null || getRowSamples() < 2)
             return 0;
 
@@ -138,15 +138,15 @@ public class SpeedInfo {
         return (int) (current * 1000 / time);
     }
 
-    synchronized public int getSamples() {
+    public synchronized int getSamples() {
         return samples.size();
     }
 
-    synchronized public Sample getSample(int index) {
+    public synchronized Sample getSample(int index) {
         return samples.get(index);
     }
 
-    synchronized public long getPeak() {
+    public synchronized long getPeak() {
         return peak;
     }
 
@@ -187,7 +187,7 @@ public class SpeedInfo {
 
     /**
      * return number of samples in the row (before download restart)
-     * 
+     *
      * @return
      */
     protected int getRowSamples() {

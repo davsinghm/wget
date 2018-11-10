@@ -115,11 +115,11 @@ public class URLInfo extends BrowserInfo {
         }
     }
 
-    synchronized public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return isEmpty;
     }
 
-    synchronized public void setEmpty(boolean isEmpty) {
+    public synchronized void setEmpty(boolean isEmpty) {
         Logger.d("WGet: URLInfo", "setEmpty(): " + isEmpty);
         this.isEmpty = isEmpty;
     }
@@ -178,69 +178,69 @@ public class URLInfo extends BrowserInfo {
         return urlConnection;
     }
 
-    synchronized public String getContentType() {
+    public synchronized String getContentType() {
         return contentType;
     }
 
-    synchronized public void setContentType(String ct) {
+    public synchronized void setContentType(String ct) {
         contentType = ct;
     }
 
-    synchronized public Long getLength() {
+    public synchronized Long getLength() {
         return length;
     }
 
-    synchronized public void setLength(Long l) {
+    public synchronized void setLength(Long l) {
         length = l;
     }
 
-    synchronized public URL getSource() {
+    public synchronized URL getSource() {
         return source;
     }
 
-    synchronized public String getContentFilename() {
+    public synchronized String getContentFilename() {
         return contentFilename;
     }
 
-    synchronized public void setContentFilename(String f) {
+    public synchronized void setContentFilename(String f) {
         contentFilename = f;
     }
 
-    synchronized public State getState() {
+    public synchronized State getState() {
         return state;
     }
 
-    synchronized public void setState(State state) {
+    public synchronized void setState(State state) {
         this.state = state;
         this.exception = null;
         this.delay = 0;
     }
 
-    synchronized public void setState(State state, Throwable e) {
+    public synchronized void setState(State state, Throwable e) {
         this.state = state;
         this.exception = e;
         this.delay = 0;
     }
 
-    synchronized public Throwable getException() {
+    public synchronized Throwable getException() {
         return exception;
     }
 
-    synchronized protected void setException(Throwable exception) {
+    protected synchronized void setException(Throwable exception) {
         this.exception = exception;
     }
 
-    synchronized public int getDelay() {
+    public synchronized int getDelay() {
         return delay;
     }
 
-    synchronized public void setDelay(int delay, Throwable e) {
+    public synchronized void setDelay(int delay, Throwable e) {
         this.delay = delay;
         this.exception = e;
         this.state = State.RETRYING;
     }
 
-    synchronized public boolean hasRange() {
+    public synchronized boolean hasRange() {
         return hasRange;
     }
 

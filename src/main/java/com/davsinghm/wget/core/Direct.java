@@ -12,7 +12,7 @@ public abstract class Direct {
     protected Context context;
     private File target;
     private DownloadInfo info;
-    static public final int BUF_SIZE = 4 * 1024; // size of read buffer
+    public static final int BUF_SIZE = 4 * 1024; // size of read buffer
 
     public Direct(Context context, DownloadInfo info, File target) {
         this.context = context;
@@ -28,6 +28,6 @@ public abstract class Direct {
         return target;
     }
 
-    abstract public void download(AtomicBoolean stop, Runnable notify);
+    public abstract void download(AtomicBoolean stop, Runnable notify);
 
 }

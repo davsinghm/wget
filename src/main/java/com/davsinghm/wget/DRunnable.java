@@ -46,18 +46,18 @@ public class DRunnable implements Runnable {
     @Nullable
     private Thread currentThread;
 
-    private void setCurrentThread(Thread currentThread) {
-        this.currentThread = currentThread;
+    DRunnable(DManager dManager, DBundle dBundle) {
+        this.dManager = dManager;
+        this.dBundle = dBundle;
+        this.context = dManager.getAppContext();
     }
 
     Thread getCurrentThread() {
         return currentThread;
     }
 
-    DRunnable(DManager dManager, DBundle dBundle) {
-        this.dManager = dManager;
-        this.dBundle = dBundle;
-        this.context = dManager.getAppContext();
+    private void setCurrentThread(Thread currentThread) {
+        this.currentThread = currentThread;
     }
 
     DBundle getDBundle() {
@@ -273,7 +273,7 @@ public class DRunnable implements Runnable {
         }
     }
 
-    synchronized private void updateProgress(DState dState) {
+    private synchronized void updateProgress(DState dState) {
 
         boolean bool = System.currentTimeMillis() - lastTimestamp > Constants.DRUNNABLE_PROGRESS_UPDATE_INTERVAL || lastDState != dState;
         if (!finished.get() && bool) {
