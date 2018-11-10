@@ -1,19 +1,30 @@
 package com.davsinghm.wget.core.info.ex;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
 public class MuxException extends Exception {
+
     public MuxException() {
         super();
     }
 
-    public MuxException(String detailMessage) {
-        super(detailMessage);
+    public MuxException(String message) {
+        super(message);
     }
 
-    public MuxException(String detailMessage, Throwable throwable) {
-        super(detailMessage, throwable);
+    public MuxException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public MuxException(Throwable throwable) {
-        super(throwable);
+    public MuxException(Throwable cause) {
+        super(cause);
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    protected MuxException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
+
 }
