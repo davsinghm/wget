@@ -65,8 +65,8 @@ public class DirectMultipart extends Direct {
             urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
 
             urlConnection.setRequestProperty("User-Agent", getInfo().getUserAgent()); //NON-NLS
-            if (getInfo().getReferrer() != null)
-                urlConnection.setRequestProperty("Referer", getInfo().getReferrer().toExternalForm());
+            if (getInfo().getReferer() != null)
+                urlConnection.setRequestProperty("Referer", getInfo().getReferer().toExternalForm());
 
             synchronized (getTarget()) {
                 randomAccessFile = new RandomAccessFile(getTarget(), "rw");

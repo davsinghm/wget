@@ -38,8 +38,8 @@ public class DirectSingle extends Direct {
             urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
 
             urlConnection.setRequestProperty("User-Agent", info.getUserAgent()); //NON-NLS
-            if (info.getReferrer() != null)
-                urlConnection.setRequestProperty("Referer", info.getReferrer().toExternalForm());
+            if (info.getReferer() != null)
+                urlConnection.setRequestProperty("Referer", info.getReferer().toExternalForm());
 
             getTarget().createNewFile();
             info.setCount(0);

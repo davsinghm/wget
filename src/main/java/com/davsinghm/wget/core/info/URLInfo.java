@@ -72,7 +72,7 @@ public class URLInfo extends BrowserInfo {
 
                 @Override
                 public void moved(URL u) {
-                    setReferrer(url);
+                    setReferer(url);
                     url = u;
                     setState(State.RETRYING);
                     notify.run();
@@ -132,8 +132,8 @@ public class URLInfo extends BrowserInfo {
         urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
 
         urlConnection.setRequestProperty("User-Agent", getUserAgent());
-        if (getReferrer() != null)
-            urlConnection.setRequestProperty("Referer", getReferrer().toExternalForm());
+        if (getReferer() != null)
+            urlConnection.setRequestProperty("Referer", getReferer().toExternalForm());
 
         // may raise an exception if not supported by server
         urlConnection.setRequestProperty("Range", "bytes=" + 0 + "-" + 0);
@@ -164,8 +164,8 @@ public class URLInfo extends BrowserInfo {
         urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
 
         urlConnection.setRequestProperty("User-Agent", getUserAgent());
-        if (getReferrer() != null)
-            urlConnection.setRequestProperty("Referer", getReferrer().toExternalForm());
+        if (getReferer() != null)
+            urlConnection.setRequestProperty("Referer", getReferer().toExternalForm());
 
         setHasRange(false);
 

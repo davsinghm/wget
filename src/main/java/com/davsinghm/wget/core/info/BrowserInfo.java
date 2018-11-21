@@ -17,11 +17,16 @@ public class BrowserInfo {
         this.userAgent = userAgent;
     }
 
-    public synchronized URL getReferrer() {
-        return referrer;
+    public synchronized URL getReferer() {
+        return referer;
     }
 
-    public synchronized void setReferrer(URL referrer) {
-        this.referrer = referrer;
+    public synchronized void setReferer(URL referer) {
+        this.referer = referer;
+    }
+
+    public synchronized void resume(BrowserInfo old) {
+        referer = old.referer;
+        userAgent = old.userAgent;
     }
 }
