@@ -3,9 +3,8 @@ package com.davsinghm.wget.core;
 import java.util.ArrayList;
 
 public class SpeedInfo {
-
-    public static final int SAMPLE_LENGTH = 1000;
-    public static final int SAMPLE_MAX = 20;
+    public static int SAMPLE_LENGTH = 1000;
+    public static int SAMPLE_MAX = 20;
 
     public class Sample {
         // bytes downloaded
@@ -39,7 +38,7 @@ public class SpeedInfo {
     protected long peak;
 
     // start sample use to calculate average speed
-    protected Sample start;
+    protected Sample start = null;
 
     public SpeedInfo() {
     }
@@ -47,7 +46,7 @@ public class SpeedInfo {
     /**
      * Start calculate speed from 'current' bytes downloaded
      *
-     * @param current
+     * @param current current length
      */
     public synchronized void start(long current) {
         Sample s = new Sample(current);
@@ -59,7 +58,7 @@ public class SpeedInfo {
     /**
      * step download process with 'current' bytes downloaded
      *
-     * @param current
+     * @param current current length
      */
     public synchronized void step(long current) {
         long now = System.currentTimeMillis();
@@ -68,6 +67,23 @@ public class SpeedInfo {
         if (lastUpdate + SAMPLE_LENGTH < now) {
             add(new Sample(current, now));
         }
+    }
+
+    synchronized public void end(long current) {
+        long now = System.currentTimeMillis();
+
+        long lastUpdate = 0;
+        long lastCurrent = 0;
+
+        if (samples.size() > 0) {
+            Sample s = samples.get(samples.size() - 1);
+            lastUpdate = s.now;
+            lastCurrent = s.current;
+        }
+
+        // step() may be at exact time or position with end(). skip it then.
+        if (lastUpdate < now && lastCurrent < current)
+            add(new Sample(current, now));
     }
 
     /**
@@ -112,7 +128,7 @@ public class SpeedInfo {
     /**
      * Average speed for maximum stepsBack steps
      *
-     * @param stepsBack
+     * @param stepsBack how many steps approximate
      * @return bytes per second
      */
     public synchronized int getAverageSpeed(int stepsBack) {
@@ -186,9 +202,9 @@ public class SpeedInfo {
     }
 
     /**
-     * return number of samples in the row (before download restart)
+     * Number of samples
      *
-     * @return
+     * @return return number of samples in the row (before download restart)
      */
     protected int getRowSamples() {
         for (int i = samples.size() - 1; i >= 0; i--) {
