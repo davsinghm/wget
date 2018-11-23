@@ -3,42 +3,41 @@ package com.davsinghm.wget;
 import android.net.Uri;
 import android.os.Parcelable;
 
-import java.io.File;
 import java.util.concurrent.BlockingQueue;
 
-public interface DBundle extends Parcelable {
+public abstract class DBundle implements Parcelable {
 
-    BlockingQueue<Job> getJobQueue();
+    public abstract BlockingQueue<Job> getJobQueue();
 
-    String getDownloadUid();
+    public abstract String getDownloadUid();
 
-    int getDownloadCode();
+    public abstract int getDownloadCode();
 
-    String getTitle();
+    public abstract String getTitle();
 
-    boolean isTwoPartDownload();
+    public abstract boolean isTwoPartDownload();
 
-    boolean isAudioOnly();
+    public abstract boolean isAudioOnly();
 
-    Uri getTargetUri();
+    public abstract Uri getTargetUri();
 
-    String getSubtitleUrl();
+    public abstract String getSubtitleUrl();
 
-    Uri getSubtitleUri();
+    public abstract Uri getSubtitleUri();
 
-    String getVideoUrl();
+    public abstract String getVideoUrl();
 
-    Uri getVideoUri();
+    public abstract Uri getVideoUri();
 
-    String getAudioUrl();
+    public abstract String getAudioUrl();
 
-    Uri getAudioUri();
+    public abstract Uri getAudioUri();
 
-    void muxAllFiles() throws Exception;
+    public abstract void muxAllFiles() throws Exception;
 
-    void updateYtUrls() throws Exception;
+    public abstract void updateYtUrls() throws Exception;
 
-    void onDownloadComplete();
+    public abstract void onDownloadComplete();
 
-    DSettings getDSettings();
+    public abstract DSettings getDSettings(); //TODO move
 }
