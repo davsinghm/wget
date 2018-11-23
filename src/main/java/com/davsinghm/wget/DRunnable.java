@@ -167,7 +167,7 @@ public class DRunnable implements Runnable {
         try {
             updateProgress(DState.EXTRACTING);
 
-            File file = dBundle.getSubtitleFile();
+            Uri file = dBundle.getSubtitleUri();
 
             new DirectSingleBg(context, dBundle.getSubtitleUrl(), file).downloadPart(stop);
 

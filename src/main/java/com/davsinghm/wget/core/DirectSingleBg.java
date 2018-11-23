@@ -1,6 +1,7 @@
 package com.davsinghm.wget.core;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
@@ -18,13 +19,14 @@ public class DirectSingleBg extends Direct {
 
     private URL url;
 
-    public DirectSingleBg(Context context, String url, File target) throws MalformedURLException {
+    public DirectSingleBg(Context context, String url, Uri target) throws MalformedURLException {
         super(context, null, target);
         this.url = new URL(url);
     }
 
     public void downloadPart(AtomicBoolean stop) throws IOException {
-        RandomAccessFile randomAccessFile = null;
+
+        RandomAccessUri randomAccessUri = null;
         BufferedInputStream bufferedInputStream = null;
 
         try {
@@ -40,14 +42,14 @@ public class DirectSingleBg extends Direct {
 
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
-            getTarget().createNewFile();
+            //file.createNewFile();
 
-            randomAccessFile = new RandomAccessFile(getTarget(), "rw");
+            randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "rw");
 
             byte[] bytes = new byte[BUF_SIZE];
             int read;
             while ((read = bufferedInputStream.read(bytes)) > 0) {
-                randomAccessFile.write(bytes, 0, read);
+                randomAccessUri.write(bytes, 0, read);
 
                 if (stop.get())
                     throw new DownloadInterruptedError("Stopped");
@@ -56,8 +58,8 @@ public class DirectSingleBg extends Direct {
             }
 
         } finally {
-            if (randomAccessFile != null)
-                randomAccessFile.close();
+            if (randomAccessUri != null)
+                randomAccessUri.close();
             if (bufferedInputStream != null)
                 bufferedInputStream.close();
         }

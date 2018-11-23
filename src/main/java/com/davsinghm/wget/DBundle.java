@@ -20,11 +20,11 @@ public interface DBundle extends Parcelable {
 
     boolean isAudioOnly();
 
-    File getTargetFile();
+    Uri getTargetUri();
 
     String getSubtitleUrl();
 
-    File getSubtitleFile();
+    Uri getSubtitleUri();
 
     String getVideoUrl();
 
