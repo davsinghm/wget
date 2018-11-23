@@ -1,6 +1,10 @@
 .DS_Store
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+/.gradle
+local.properties
+/.idea
 /build
+/gradle
+gradlew
+gradlew.bat
+wget.iml
+wget2.iml
