@@ -1,6 +1,7 @@
 package com.davsinghm.wget.core;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Process;
 
 import com.davsinghm.wget.Constants;
@@ -14,9 +15,7 @@ import com.davsinghm.wget.core.info.ex.DownloadRetry;
 import com.davsinghm.wget.core.threads.LimitThreadPool;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,7 +26,7 @@ public class DirectMultipart extends Direct {
     private boolean isFatal;
     private final Object lock = new Object();
 
-    public DirectMultipart(Context context, DownloadInfo info, File target) {
+    public DirectMultipart(Context context, DownloadInfo info, Uri target) {
         super(context, info, target);
         this.limitThreadPool = new LimitThreadPool(info.getDSettings().getThreadCount());
     }
@@ -41,7 +40,8 @@ public class DirectMultipart extends Direct {
      * @param part Part to download
      */
     private void downloadPart(Part part, AtomicBoolean stop, Runnable notify) throws IOException {
-        RandomAccessFile randomAccessFile = null;
+
+        RandomAccessUri randomAccessUri = null;
         BufferedInputStream bufferedInputStream = null;
 
         try {
@@ -69,8 +69,8 @@ public class DirectMultipart extends Direct {
                 urlConnection.setRequestProperty("Referer", getInfo().getReferer().toExternalForm());
 
             synchronized (getTarget()) {
-                randomAccessFile = new RandomAccessFile(getTarget(), "rw");
-                randomAccessFile.seek(start);
+                randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "w");
+                randomAccessUri.seek(start);
             }
 
             urlConnection.setRequestProperty("Range", "bytes=" + start + "-" + end); //NON-NLS
@@ -93,7 +93,7 @@ public class DirectMultipart extends Direct {
                     localStop = true;
                 }
 
-                randomAccessFile.write(bytes, 0, read);
+                randomAccessUri.write(bytes, 0, read);
                 part.setCount(part.getCount() + read);
                 getInfo().updateMultipartCount();
                 notify.run();
@@ -119,8 +119,8 @@ public class DirectMultipart extends Direct {
         } finally {
             if (bufferedInputStream != null)
                 bufferedInputStream.close();
-            if (randomAccessFile != null)
-                randomAccessFile.close();
+            if (randomAccessUri != null)
+                randomAccessUri.close();
         }
 
     }
@@ -153,7 +153,7 @@ public class DirectMultipart extends Direct {
 
                         @Override
                         public Context getContext() {
-                            return context;
+                            return DirectMultipart.this.getContext();
                         }
 
                         @Override

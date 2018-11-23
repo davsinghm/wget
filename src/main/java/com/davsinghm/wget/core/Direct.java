@@ -1,6 +1,7 @@
 package com.davsinghm.wget.core;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.davsinghm.wget.core.info.DownloadInfo;
 
@@ -10,11 +11,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class Direct {
 
     public static final int BUF_SIZE = 4 * 1024; // size of read buffer
-    protected Context context;
-    private File target;
+
+    private Context context;
+    private Uri target;
     private DownloadInfo info;
 
-    public Direct(Context context, DownloadInfo info, File target) {
+    public Direct(Context context, DownloadInfo info, Uri target) {
         this.context = context;
         this.target = target;
         this.info = info;
@@ -24,8 +26,12 @@ public abstract class Direct {
         return info;
     }
 
-    protected synchronized File getTarget() {
+    protected synchronized Uri getTarget() {
         return target;
+    }
+
+    protected synchronized Context getContext() {
+        return context;
     }
 
     public abstract void download(AtomicBoolean stop, Runnable notify);

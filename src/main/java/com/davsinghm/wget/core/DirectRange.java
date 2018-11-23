@@ -1,6 +1,7 @@
 package com.davsinghm.wget.core;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.DownloadInfo;
@@ -17,12 +18,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectRange extends Direct {
 
-    public DirectRange(Context context, DownloadInfo info, File target) {
+    public DirectRange(Context context, DownloadInfo info, Uri target) {
         super(context, info, target);
     }
 
     public void downloadPart(DownloadInfo info, AtomicBoolean stop, Runnable notify) throws IOException {
-        RandomAccessFile randomAccessFile = null;
+
+        RandomAccessUri randomAccessUri = null;
         BufferedInputStream bufferedInputStream = null;
 
         try {
@@ -37,11 +39,12 @@ public class DirectRange extends Direct {
             if (info.getReferer() != null)
                 urlConnection.setRequestProperty("Referer", info.getReferer().toExternalForm());
 
-            if (!getTarget().exists())
-                getTarget().createNewFile();
-            info.setCount(getTarget().length()); /*
+            randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "rw");
+
+            //if (!getTarget().exists()) getTarget().createNewFile();
+            info.setCount(randomAccessUri.length()); /*
                 TODO fix bug, if DefaultSetting is Multipart: off, if download is resuming
-                 previously multipart on, if exception occured (if file length from sever is different than last time [stored in db]) in  fromString() download will resumed with checking file size,
+                 previously multipart on, if exception occurred (if file length from sever is different than last time [stored in db]) in  fromString() download will resumed with checking file size,
                   and half of the file will left empty
                   or if file lengths are different they will be appended than restart
                   solution: force restart, use flag
@@ -53,11 +56,10 @@ public class DirectRange extends Direct {
                 return;
             }
 
-            randomAccessFile = new RandomAccessFile(getTarget(), "rw");
 
             if (info.getCount() > 0) {
                 urlConnection.setRequestProperty("Range", "bytes=" + info.getCount() + "-"); //NON-NLS
-                randomAccessFile.seek(info.getCount());
+                randomAccessUri.seek(info.getCount());
             }
 
             RetryWrap.checkResponse(urlConnection);
@@ -67,7 +69,7 @@ public class DirectRange extends Direct {
             byte[] bytes = new byte[BUF_SIZE];
             int read;
             while ((read = bufferedInputStream.read(bytes)) > 0) {
-                randomAccessFile.write(bytes, 0, read);
+                randomAccessUri.write(bytes, 0, read);
 
                 info.setCount(info.getCount() + read);
                 notify.run();
@@ -80,8 +82,8 @@ public class DirectRange extends Direct {
             }
 
         } finally {
-            if (randomAccessFile != null)
-                randomAccessFile.close();
+            if (randomAccessUri != null)
+                randomAccessUri.close();
             if (bufferedInputStream != null)
                 bufferedInputStream.close();
         }
@@ -95,7 +97,7 @@ public class DirectRange extends Direct {
 
                 @Override
                 public Context getContext() {
-                    return context;
+                    return DirectRange.this.getContext();
                 }
 
                 @Override

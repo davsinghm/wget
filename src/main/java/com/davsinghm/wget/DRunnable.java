@@ -1,6 +1,7 @@
 package com.davsinghm.wget;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 
 import com.davsinghm.wget.core.DirectMultipart;
@@ -117,10 +118,10 @@ public class DRunnable implements Runnable {
                     updateYtUrls();
                     break;
                 case VIDEO:
-                    download(dBundle.getVideoUrl(), dBundle.getVideoFile());
+                    download(dBundle.getVideoUrl(), dBundle.getVideoUri());
                     break;
                 case AUDIO:
-                    download(dBundle.getAudioUrl(), dBundle.getAudioFile());
+                    download(dBundle.getAudioUrl(), dBundle.getAudioUri());
                     break;
                 case SUBTITLE:
                     downloadSubtitles();
@@ -175,7 +176,7 @@ public class DRunnable implements Runnable {
         }
     }
 
-    private void download(String url, File target) throws Exception {
+    private void download(String url, Uri target) throws Exception {
 
        /* while (!stop.get()) {
             updateProgress(DState.RETRYING);

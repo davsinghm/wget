@@ -1,5 +1,6 @@
 package com.davsinghm.wget;
 
+import android.net.Uri;
 import android.os.Parcelable;
 
 import java.io.File;
@@ -27,11 +28,11 @@ public interface DBundle extends Parcelable {
 
     String getVideoUrl();
 
-    File getVideoFile();
+    Uri getVideoUri();
 
     String getAudioUrl();
 
-    File getAudioFile();
+    Uri getAudioUri();
 
     void muxAllFiles() throws Exception;
 

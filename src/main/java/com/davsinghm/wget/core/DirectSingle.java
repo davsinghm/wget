@@ -1,6 +1,7 @@
 package com.davsinghm.wget.core;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.DownloadInfo;
@@ -10,7 +11,6 @@ import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,12 +21,13 @@ public class DirectSingle extends Direct {
      * @param info   download file information
      * @param target target file
      */
-    public DirectSingle(Context context, DownloadInfo info, File target) {
+    public DirectSingle(Context context, DownloadInfo info, Uri target) {
         super(context, info, target);
     }
 
     void downloadPart(DownloadInfo info, AtomicBoolean stop, Runnable notify) throws IOException {
-        RandomAccessFile randomAccessFile = null;
+
+        RandomAccessUri randomAccessUri = null;
         BufferedInputStream bufferedInputStream = null;
 
         try {
@@ -41,11 +42,12 @@ public class DirectSingle extends Direct {
             if (info.getReferer() != null)
                 urlConnection.setRequestProperty("Referer", info.getReferer().toExternalForm());
 
-            getTarget().createNewFile();
+            //getTarget().createNewFile();
             info.setCount(0);
             info.getSpeedInfo().start(0);
 
-            randomAccessFile = new RandomAccessFile(getTarget(), "rw");
+            randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "rw");
+            randomAccessUri.seek(0); //TODO see if needed
 
             RetryWrap.checkResponse(urlConnection);
 
@@ -54,7 +56,7 @@ public class DirectSingle extends Direct {
             byte[] bytes = new byte[BUF_SIZE];
             int read;
             while ((read = bufferedInputStream.read(bytes)) > 0) {
-                randomAccessFile.write(bytes, 0, read);
+                randomAccessUri.write(bytes, 0, read);
 
                 info.setCount(info.getCount() + read);
                 notify.run();
@@ -67,8 +69,8 @@ public class DirectSingle extends Direct {
             }
 
         } finally {
-            if (randomAccessFile != null)
-                randomAccessFile.close();
+            if (randomAccessUri != null)
+                randomAccessUri.close();
             if (bufferedInputStream != null)
                 bufferedInputStream.close();
         }
@@ -82,7 +84,7 @@ public class DirectSingle extends Direct {
 
                 @Override
                 public Context getContext() {
-                    return context;
+                    return DirectSingle.this.getContext();
                 }
 
                 @Override
