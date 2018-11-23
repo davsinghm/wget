@@ -6,8 +6,12 @@ import java.net.URL;
 
 public class BrowserInfo {
 
-    private String userAgent = Constants.USER_AGENT;
-    private URL referrer;
+    private String userAgent;
+    private URL referer;
+
+    public BrowserInfo() {
+        userAgent = Constants.USER_AGENT;
+    }
 
     public synchronized String getUserAgent() {
         return userAgent;
