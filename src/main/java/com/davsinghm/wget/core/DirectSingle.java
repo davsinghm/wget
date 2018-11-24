@@ -3,7 +3,6 @@ package com.davsinghm.wget.core;
 import android.content.Context;
 import android.net.Uri;
 
-import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.State;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
@@ -31,17 +30,6 @@ public class DirectSingle extends Direct {
         BufferedInputStream bufferedInputStream = null;
 
         try {
-            URL url = info.getSource();
-
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-            urlConnection.setConnectTimeout(Constants.WGET_CONNECT_TIMEOUT);
-            urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
-
-            urlConnection.setRequestProperty("User-Agent", info.getUserAgent()); //NON-NLS
-            if (info.getReferer() != null)
-                urlConnection.setRequestProperty("Referer", info.getReferer().toExternalForm());
-
             //getTarget().createNewFile();
             info.setCount(0);
             info.getSpeedInfo().start(0);
@@ -49,8 +37,8 @@ public class DirectSingle extends Direct {
             randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "rw");
             randomAccessUri.seek(0); //TODO see if needed
 
+            HttpURLConnection urlConnection = HttpUtil.openConnection(info);
             HttpUtil.checkResponse(urlConnection);
-
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
             byte[] bytes = new byte[BUF_SIZE];

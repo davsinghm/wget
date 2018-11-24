@@ -55,14 +55,12 @@ public class DirectRange extends Direct {
                 return;
             }
 
+            randomAccessUri.seek(info.getCount());
 
-            if (info.getCount() > 0) {
-                urlConnection.setRequestProperty("Range", "bytes=" + info.getCount() + "-"); //NON-NLS
-                randomAccessUri.seek(info.getCount());
-            }
-
+            HttpURLConnection urlConnection = HttpUtil.openConnection(info);
+            if (info.getCount() > 0)
+                urlConnection.setRequestProperty("Range", "bytes=" + info.getCount() + "-");
             HttpUtil.checkResponse(urlConnection);
-
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
             byte[] bytes = new byte[BUF_SIZE];

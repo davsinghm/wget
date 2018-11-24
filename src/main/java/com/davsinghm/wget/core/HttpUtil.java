@@ -1,16 +1,19 @@
 package com.davsinghm.wget.core;
 
+import com.davsinghm.wget.Constants;
+import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.ex.DownloadIOCodeError;
 import com.davsinghm.wget.core.info.ex.DownloadMoved;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class HttpUtil {
 
     public static void checkResponse(HttpURLConnection c) throws IOException {
-        int code = c.getResponseCode();
-        switch (code) {
+
+        switch (c.getResponseCode()) {
             case HttpURLConnection.HTTP_OK:
             case HttpURLConnection.HTTP_PARTIAL:
                 return;
@@ -24,5 +27,22 @@ public class HttpUtil {
                 // HTTP Error 416 - Requested Range Not Satisfiable
                 throw new DownloadIOCodeError(416);
         }
+    }
+
+    public static HttpURLConnection openConnection(DownloadInfo info) throws IOException {
+
+        URL url = info.getSource();
+
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+        urlConnection.setConnectTimeout(Constants.WGET_CONNECT_TIMEOUT);
+        urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
+
+        urlConnection.setRequestProperty("User-Agent", info.getUserAgent());
+
+        if (info.getReferer() != null)
+            urlConnection.setRequestProperty("Referer", info.getReferer().toExternalForm());
+
+        return urlConnection;
     }
 }

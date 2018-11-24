@@ -45,7 +45,6 @@ public class DirectMultipart extends Direct {
         BufferedInputStream bufferedInputStream = null;
 
         try {
-            URL url = getInfo().getSource();
 
             long start = part.getStart() + part.getCount();
             long end = part.getEnd();
@@ -59,24 +58,14 @@ public class DirectMultipart extends Direct {
                 return;
             }
 
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-            urlConnection.setConnectTimeout(Constants.WGET_CONNECT_TIMEOUT);
-            urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
-
-            urlConnection.setRequestProperty("User-Agent", getInfo().getUserAgent()); //NON-NLS
-            if (getInfo().getReferer() != null)
-                urlConnection.setRequestProperty("Referer", getInfo().getReferer().toExternalForm());
-
             synchronized (getTarget()) {
                 randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "w");
                 randomAccessUri.seek(start);
             }
 
+            HttpURLConnection urlConnection = HttpUtil.openConnection(getInfo());
             urlConnection.setRequestProperty("Range", "bytes=" + start + "-" + end); //NON-NLS
-
             HttpUtil.checkResponse(urlConnection);
-
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
             byte[] bytes = new byte[BUF_SIZE];

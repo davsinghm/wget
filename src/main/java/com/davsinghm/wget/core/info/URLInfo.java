@@ -127,6 +127,7 @@ public class URLInfo extends BrowserInfo {
 
     // if range failed - do plain download with no retrys's
     private HttpURLConnection extractRange(URL source) throws IOException {
+
         HttpURLConnection urlConnection = (HttpURLConnection) source.openConnection();
 
         urlConnection.setConnectTimeout(Constants.WGET_CONNECT_TIMEOUT);
