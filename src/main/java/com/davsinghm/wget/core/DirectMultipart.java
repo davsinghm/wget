@@ -75,7 +75,7 @@ public class DirectMultipart extends Direct {
 
             urlConnection.setRequestProperty("Range", "bytes=" + start + "-" + end); //NON-NLS
 
-            RetryWrap.checkResponse(urlConnection);
+            HttpUtil.checkResponse(urlConnection);
 
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 

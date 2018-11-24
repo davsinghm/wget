@@ -49,7 +49,7 @@ public class DirectSingle extends Direct {
             randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "rw");
             randomAccessUri.seek(0); //TODO see if needed
 
-            RetryWrap.checkResponse(urlConnection);
+            HttpUtil.checkResponse(urlConnection);
 
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.Logger;
+import com.davsinghm.wget.core.HttpUtil;
 import com.davsinghm.wget.core.RetryWrap;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.info.ex.DownloadMoved;
@@ -138,7 +139,7 @@ public class URLInfo extends BrowserInfo {
         // may raise an exception if not supported by server
         urlConnection.setRequestProperty("Range", "bytes=" + 0 + "-" + 0);
 
-        RetryWrap.checkResponse(urlConnection);
+        HttpUtil.checkResponse(urlConnection);
 
         String range = urlConnection.getHeaderField("Content-Range");
         if (range == null)
@@ -169,7 +170,7 @@ public class URLInfo extends BrowserInfo {
 
         setHasRange(false);
 
-        RetryWrap.checkResponse(urlConnection);
+        HttpUtil.checkResponse(urlConnection);
 
         long len = urlConnection.getContentLength();
         if (len >= 0)

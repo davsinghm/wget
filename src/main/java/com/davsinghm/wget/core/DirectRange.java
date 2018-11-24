@@ -11,7 +11,6 @@ import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,7 +61,7 @@ public class DirectRange extends Direct {
                 randomAccessUri.seek(info.getCount());
             }
 
-            RetryWrap.checkResponse(urlConnection);
+            HttpUtil.checkResponse(urlConnection);
 
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
