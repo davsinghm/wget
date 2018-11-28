@@ -17,8 +17,8 @@ public class DirectSingleBg extends Direct {
 
     private URL url;
 
-    public DirectSingleBg(Context context, String url, Uri target) throws MalformedURLException {
-        super(context, null, target);
+    public DirectSingleBg(Context context, String url, Uri directory, String filename) throws MalformedURLException {
+        super(context, null, directory, filename);
         this.url = new URL(url);
     }
 
@@ -40,9 +40,7 @@ public class DirectSingleBg extends Direct {
 
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
-            //file.createNewFile();
-
-            randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "rw");
+            randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
 
             byte[] bytes = new byte[BUF_SIZE];
             int read;

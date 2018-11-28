@@ -16,12 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectSingle extends Direct {
 
-    /**
-     * @param info   download file information
-     * @param target target file
-     */
-    public DirectSingle(Context context, DownloadInfo info, Uri target) {
-        super(context, info, target);
+    public DirectSingle(Context context, DownloadInfo info, Uri directory, String filename) {
+        super(context, info, directory, filename);
     }
 
     void downloadPart(DownloadInfo info, AtomicBoolean stop, Runnable notify) throws IOException {
@@ -30,11 +26,10 @@ public class DirectSingle extends Direct {
         BufferedInputStream bufferedInputStream = null;
 
         try {
-            //getTarget().createNewFile();
             info.setCount(0);
             info.getSpeedInfo().start(0);
 
-            randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "rw");
+            randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
             randomAccessUri.seek(0); //TODO see if needed
 
             HttpURLConnection urlConnection = HttpUtil.openConnection(info);

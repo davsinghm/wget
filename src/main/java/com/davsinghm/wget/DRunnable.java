@@ -16,7 +16,6 @@ import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.info.ex.DownloadMultipartError;
 import com.davsinghm.wget.core.info.ex.MuxException;
 
-import java.io.File;
 import java.io.InterruptedIOException;
 import java.net.URL;
 import java.util.List;
@@ -118,10 +117,10 @@ public class DRunnable implements Runnable {
                     updateYtUrls();
                     break;
                 case VIDEO:
-                    download(dBundle.getVideoUrl(), dBundle.getVideoUri());
+                    download(dBundle.getVideoUrl(), dBundle.getDirectory(), dBundle.getVideoFilename());
                     break;
                 case AUDIO:
-                    download(dBundle.getAudioUrl(), dBundle.getAudioUri());
+                    download(dBundle.getAudioUrl(), dBundle.getDirectory(), dBundle.getAudioFilename());
                     break;
                 case SUBTITLE:
                     downloadSubtitles();
@@ -167,16 +166,17 @@ public class DRunnable implements Runnable {
         try {
             updateProgress(DState.EXTRACTING);
 
-            Uri file = dBundle.getSubtitleUri();
+            Uri directory = dBundle.getDirectory();
+            String filename = dBundle.getSubtitleFilename();
 
-            new DirectSingleBg(context, dBundle.getSubtitleUrl(), file).downloadPart(stop);
+            new DirectSingleBg(context, dBundle.getSubtitleUrl(), directory, filename).downloadPart(stop);
 
         } catch (Exception e) { //TODO make fatal
             Logger.wtf("DRunnable: Non-Fatal, Critical: downloadSubtitles(): Failed to load subtitles.", e);
         }
     }
 
-    private void download(String url, Uri target) throws Exception {
+    private void download(String url, Uri directory, String filename) throws Exception {
 
        /* while (!stop.get()) {
             updateProgress(DState.RETRYING);
@@ -226,13 +226,13 @@ public class DRunnable implements Runnable {
 
             if (dInfo.isMultipart()) {
                 Logger.d("WGet", "createDirect(): MultiPart");
-                new DirectMultipart(context, dInfo, target).download(stop, notify);
+                new DirectMultipart(context, dInfo, directory, filename).download(stop, notify);
             } else if (dInfo.hasRange()) {
                 Logger.d("WGet", "createDirect(): Range");
-                new DirectRange(context, dInfo, target).download(stop, notify);
+                new DirectRange(context, dInfo, directory, filename).download(stop, notify);
             } else {
                 Logger.d("WGet", "createDirect(): Single");
-                new DirectSingle(context, dInfo, target).download(stop, notify);
+                new DirectSingle(context, dInfo, directory, filename).download(stop, notify);
             }
 
         } catch (DownloadMultipartError e) {  //TODO improve, backport add suppressed ? + do all wget exception logging

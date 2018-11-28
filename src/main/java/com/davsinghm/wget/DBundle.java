@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import java.util.concurrent.BlockingQueue;
 
+import androidx.annotation.NonNull;
+
 public abstract class DBundle implements Parcelable {
 
     public abstract BlockingQueue<Job> getJobQueue();
@@ -19,20 +21,6 @@ public abstract class DBundle implements Parcelable {
 
     public abstract boolean isAudioOnly();
 
-    public abstract Uri getTargetUri();
-
-    public abstract String getSubtitleUrl();
-
-    public abstract Uri getSubtitleUri();
-
-    public abstract String getVideoUrl();
-
-    public abstract Uri getVideoUri();
-
-    public abstract String getAudioUrl();
-
-    public abstract Uri getAudioUri();
-
     public abstract void muxAllFiles() throws Exception;
 
     public abstract void updateYtUrls() throws Exception;
@@ -40,4 +28,25 @@ public abstract class DBundle implements Parcelable {
     public abstract void onDownloadComplete();
 
     public abstract DSettings getDSettings(); //TODO move
+
+    public abstract String getVideoUrl();
+
+    public abstract String getAudioUrl();
+
+    public abstract String getSubtitleUrl();
+
+    @NonNull
+    public abstract Uri getDirectory();
+
+    @NonNull
+    public abstract String getTargetFilename();
+
+    @NonNull
+    public abstract String getVideoFilename();
+
+    @NonNull
+    public abstract String getAudioFilename();
+
+    @NonNull
+    public abstract String getSubtitleFilename();
 }

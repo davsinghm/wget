@@ -26,8 +26,8 @@ public class DirectMultipart extends Direct {
     private boolean isFatal;
     private final Object lock = new Object();
 
-    public DirectMultipart(Context context, DownloadInfo info, Uri target) {
-        super(context, info, target);
+    public DirectMultipart(Context context, DownloadInfo info, Uri directory, String filename) {
+        super(context, info, directory, filename);
         this.limitThreadPool = new LimitThreadPool(info.getDSettings().getThreadCount());
     }
 
@@ -58,8 +58,8 @@ public class DirectMultipart extends Direct {
                 return;
             }
 
-            synchronized (getTarget()) {
-                randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "w");
+            synchronized (getContext()) {
+                randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "w");
                 randomAccessUri.seek(start);
             }
 

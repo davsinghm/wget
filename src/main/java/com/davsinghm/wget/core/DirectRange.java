@@ -3,7 +3,6 @@ package com.davsinghm.wget.core;
 import android.content.Context;
 import android.net.Uri;
 
-import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.State;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
@@ -17,8 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectRange extends Direct {
 
-    public DirectRange(Context context, DownloadInfo info, Uri target) {
-        super(context, info, target);
+    public DirectRange(Context context, DownloadInfo info, Uri directory, String filename) {
+        super(context, info, directory, filename);
     }
 
     public void downloadPart(DownloadInfo info, AtomicBoolean stop, Runnable notify) throws IOException {
@@ -27,18 +26,8 @@ public class DirectRange extends Direct {
         BufferedInputStream bufferedInputStream = null;
 
         try {
-            URL url = info.getSource();
 
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-            urlConnection.setConnectTimeout(Constants.WGET_CONNECT_TIMEOUT);
-            urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
-
-            urlConnection.setRequestProperty("User-Agent", info.getUserAgent()); //NON-NLS
-            if (info.getReferer() != null)
-                urlConnection.setRequestProperty("Referer", info.getReferer().toExternalForm());
-
-            randomAccessUri = new RandomAccessUri(getContext(), getTarget(), "rw");
+            randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
 
             //if (!getTarget().exists()) getTarget().createNewFile();
             info.setCount(randomAccessUri.length()); /*

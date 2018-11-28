@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import androidx.annotation.NonNull;
+
 public class RandomAccessUri {
 
     private ParcelFileDescriptor parcelFileDescriptor;
@@ -27,7 +29,7 @@ public class RandomAccessUri {
      * @throws FileNotFoundException Throws FileNotFoundException if no
      *                               file exists under the URI or the mode is invalid.
      */
-    public RandomAccessUri(Context context, Uri uri, String mode) throws FileNotFoundException {
+    public RandomAccessUri(Context context, @NonNull Uri uri, String mode) throws FileNotFoundException {
         parcelFileDescriptor = context.getContentResolver().openFileDescriptor(uri, mode);
 
         if (parcelFileDescriptor == null)
