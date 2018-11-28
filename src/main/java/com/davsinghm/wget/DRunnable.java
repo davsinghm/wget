@@ -294,6 +294,20 @@ public class DRunnable implements Runnable {
                     break;
                 case MUXING:
                 case ENCODING:
+                    //send newer
+                    String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadUid());
+                    String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadUid());
+                    //also add subtitles?
+                    long length = 0;
+                    long count = 0;
+                    length += DInfoHelper.getLengthFromInfoString(videoStr);
+                    length += DInfoHelper.getLengthFromInfoString(audioStr);
+                    count += DInfoHelper.getCountFromInfoString(videoStr);
+                    count += DInfoHelper.getCountFromInfoString(audioStr);
+                    dProgress.setLength(length);
+                    dProgress.setCount(count);
+                    //TODO instead of sum of two files, should we just update content length in dbundle table with filesize? that way encoding one also be supported.
+
                     onGoing = 1;
                     DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadUid(), "ONGOING");
                     break;
@@ -307,24 +321,6 @@ public class DRunnable implements Runnable {
                     DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadUid(), dInfo.toString(), "ONGOING");
                     break;
                 case COMPLETE:
-                    //if two part, update total count and size/length. this part is added quite later
-                    if (dBundle.isTwoPartDownload()) {
-                        //need to load dinfos again, as only one is avail.
-                        String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadUid());
-                        String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadUid());
-                        //also add subtitles?
-                        long length = 0;
-                        long count = 0;
-                        length += DInfoHelper.getLengthFromInfoString(videoStr);
-                        length += DInfoHelper.getLengthFromInfoString(audioStr);
-                        count += DInfoHelper.getCountFromInfoString(videoStr);
-                        count += DInfoHelper.getCountFromInfoString(audioStr);
-
-                        dProgress.setLength(length);
-                        dProgress.setCount(count);
-                        //TODO instead of sum of two files, should we just update content length in dbundle table with filesize? that way encoding one also be supported.
-                    } //if encoding is supported. can update content length of newly encoded file.
-
                     dBundle.onDownloadComplete();
 
                 case ERROR:
