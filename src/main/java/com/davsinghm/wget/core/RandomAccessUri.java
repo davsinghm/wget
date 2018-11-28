@@ -99,7 +99,7 @@ public class RandomAccessUri {
      */
     public void close() throws IOException {
         //fileDescriptor.sync(); TODO
-        //fileChannel.force(false);
+        fileChannel.force(true);
         fileChannel.close();
         parcelFileDescriptor.close();
     }

@@ -59,7 +59,7 @@ public class DirectMultipart extends Direct {
             }
 
             synchronized (getContext()) {
-                randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "w");
+                randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
                 randomAccessUri.seek(start);
             }
 
