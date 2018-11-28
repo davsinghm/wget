@@ -28,7 +28,7 @@ repositories {
 }
 
 
-ext.androidxLibVersion = '1.0.0'
+ext.androidxLibVersion = '1.0.2'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
