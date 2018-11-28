@@ -381,6 +381,8 @@ public class DRunnable implements Runnable {
             updateProgress(DState.STOPPED);
             throw new MuxException(e);
         } catch (Exception e) {
+            Logger.wtf("DRunnable", e);
+
             updateProgress(DState.MUX_ERROR);
             throw new MuxException(e);
         }
