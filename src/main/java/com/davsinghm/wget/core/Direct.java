@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
@@ -46,18 +47,27 @@ public abstract class Direct {
     public abstract void download(AtomicBoolean stop, Runnable notify);
 
     @Nullable
+    public static DocumentFile findFile(DocumentFile directoryFile, @NonNull String displayName) {
+        for (DocumentFile doc : directoryFile.listFiles())
+            if (displayName.equalsIgnoreCase(doc.getName()))
+                return doc;
+
+        return null;
+    }
+
+    @Nullable
     DocumentFile getTargetFile() throws IOException {
         Logger.d("Direct", "Creating File: " + filename + "\nin URI: " + directory.toString());
         if (targetFile == null)
             if (directory != null)
                 if (ContentResolver.SCHEME_FILE.equals(directory.getScheme())) {
                     DocumentFile directoryFile = DocumentFile.fromFile(new File(directory.getPath()));
-                    if ((targetFile = directoryFile.findFile(filename)) == null)
+                    if ((targetFile = findFile(directoryFile, filename)) == null)
                         if ((targetFile = directoryFile.createFile("", filename)) == null)
                             throw new IOException("Unable to create new file");
                 } else {
                     DocumentFile directoryFile = DocumentFile.fromTreeUri(context, directory);
-                    if (directoryFile != null && (targetFile = directoryFile.findFile(filename)) == null)
+                    if (directoryFile != null && (targetFile = findFile(directoryFile, filename)) == null)
                         if ((targetFile = directoryFile.createFile("", filename)) == null)
                             throw new IOException("Unable to create new file");
                 }
