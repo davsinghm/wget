@@ -6,22 +6,22 @@ public class Logger {
 
     public static void wtf(String tag, Throwable t) {
         if (callback != null)
-            callback.e(tag, t);
+            callback.wtf(tag, t);
     }
 
     public static void wtf(String tag, String msg) {
         if (callback != null)
-            callback.e(tag, msg);
+            callback.wtf(tag, msg);
     }
 
     public static void wtf(String tag, String msg, Throwable t) {
         if (callback != null)
-            callback.e(tag, msg, t);
+            callback.wtf(tag, msg, t);
     }
 
     public static void d(String tag, String msg) {
         if (callback != null)
-            callback.e(tag, msg);
+            callback.d(tag, msg);
     }
 
     public static void e(String tag, String msg) {
@@ -31,22 +31,22 @@ public class Logger {
 
     public static void i(String tag, String msg) {
         if (callback != null)
-            callback.e(tag, msg);
+            callback.i(tag, msg);
     }
 
     public static void w(String tag, String msg) {
         if (callback != null)
-            callback.e(tag, msg);
+            callback.w(tag, msg);
     }
 
     public static void w(String tag, Throwable t) {
         if (callback != null)
-            callback.e(tag, t);
+            callback.w(tag, t);
     }
 
     public static void w(String tag, String msg, Throwable t) {
         if (callback != null)
-            callback.e(tag, msg, t);
+            callback.w(tag, msg, t);
     }
 
     public interface Callback {
