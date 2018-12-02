@@ -63,8 +63,7 @@ public class DirectMultipart extends Direct {
                 randomAccessUri.seek(start);
             }
 
-            HttpURLConnection urlConnection = HttpUtil.openConnection(getInfo());
-            urlConnection.setRequestProperty("Range", "bytes=" + start + "-" + end); //NON-NLS
+            HttpURLConnection urlConnection = HttpUtil.openConnection(getInfo(), start, end);
             HttpUtil.checkResponse(urlConnection);
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 

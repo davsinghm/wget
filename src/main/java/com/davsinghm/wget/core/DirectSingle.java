@@ -32,7 +32,7 @@ public class DirectSingle extends Direct {
             randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
             randomAccessUri.seek(0); //TODO see if needed
 
-            HttpURLConnection urlConnection = HttpUtil.openConnection(info);
+            HttpURLConnection urlConnection = HttpUtil.openConnection(info, info.getCount());
             HttpUtil.checkResponse(urlConnection);
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 

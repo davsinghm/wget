@@ -28,15 +28,15 @@ public class DirectRange extends Direct {
         try {
 
             randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
-
-            //if (!getTarget().exists()) getTarget().createNewFile();
-            info.setCount(randomAccessUri.length()); /*
+            /*
                 TODO fix bug, if DefaultSetting is Multipart: off, if download is resuming
-                 previously multipart on, if exception occurred (if file length from sever is different than last time [stored in db]) in  fromString() download will resumed with checking file size,
-                  and half of the file will left empty
-                  or if file lengths are different they will be appended than restart
-                  solution: force restart, use flag
+                previously multipart on, if exception occurred (if file length from sever is different than last time [stored in db]) in  fromString() download will resumed with checking file size,
+                and half of the file will left empty
+                or if file lengths are different they will be appended than restart
+                solution: force restart, use flag
             */
+            info.setCount(randomAccessUri.length());
+
             info.getSpeedInfo().start(info.getCount());
 
             if (info.getCount() >= info.getLength()) {
@@ -46,9 +46,7 @@ public class DirectRange extends Direct {
 
             randomAccessUri.seek(info.getCount());
 
-            HttpURLConnection urlConnection = HttpUtil.openConnection(info);
-            if (info.getCount() > 0)
-                urlConnection.setRequestProperty("Range", "bytes=" + info.getCount() + "-");
+            HttpURLConnection urlConnection = HttpUtil.openConnection(info, info.getCount());
             HttpUtil.checkResponse(urlConnection);
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 

@@ -29,12 +29,11 @@ public class HttpUtil {
         }
     }
 
-    public static HttpURLConnection openConnection(DownloadInfo info) throws IOException {
+    public static HttpURLConnection openConnection(DownloadInfo info, long start, long end) throws IOException {
 
         URL url = info.getSource();
 
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
         urlConnection.setConnectTimeout(Constants.WGET_CONNECT_TIMEOUT);
         urlConnection.setReadTimeout(Constants.WGET_READ_TIMEOUT);
 
@@ -43,6 +42,13 @@ public class HttpUtil {
         if (info.getReferer() != null)
             urlConnection.setRequestProperty("Referer", info.getReferer().toExternalForm());
 
+        if (start > 0 || end > 0)
+            urlConnection.setRequestProperty("Range", "bytes=" + start + "-" + (end > 0 ? end : ""));
+
         return urlConnection;
+    }
+
+    public static HttpURLConnection openConnection(DownloadInfo info, long start) throws IOException {
+        return openConnection(info, start, 0);
     }
 }
