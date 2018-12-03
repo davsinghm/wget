@@ -66,7 +66,7 @@ public class DRunnable implements Runnable {
     }
 
     String getDownloadUid() {
-        return dBundle.getDownloadUid();
+        return dBundle.getDownloadId();
     }
 
     private void progressUpdate(int what, DProgress progress) {
@@ -158,7 +158,7 @@ public class DRunnable implements Runnable {
 
     @NonNull
     private String getDInfoID() {
-        return dBundle.getDownloadUid() + " " + "[" + (currentJob != null ? currentJob.toString().substring(0, 1) : "N") + (dBundle.isTwoPartDownload() ? "|2" : "") + "]"; //NON-NLS
+        return dBundle.getDownloadId() + " " + "[" + (currentJob != null ? currentJob.toString().substring(0, 1) : "N") + (dBundle.isTwoPartDownload() ? "|2" : "") + "]"; //NON-NLS
     }
 
     private void downloadSubtitles() {
@@ -209,7 +209,7 @@ public class DRunnable implements Runnable {
                         updateProgress(DState.ERROR);
                         break;
                     case DONE:
-                        DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadUid(), dInfo.toString(), "DONE");
+                        DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadId(), dInfo.toString(), "DONE");
                         break;
                 }
             }
@@ -222,7 +222,7 @@ public class DRunnable implements Runnable {
             dInfo.setDInfoID(getDInfoID());
             dInfo.setDSettings(dSettings);
             dInfo.extract(context, stop, notify);
-            dInfo.fromString(notify, DInfoHelper.getInstance(context).getInfoString(getTableName(), dBundle.getDownloadUid()));
+            dInfo.fromString(notify, DInfoHelper.getInstance(context).getInfoString(getTableName(), dBundle.getDownloadId()));
 
             if (dInfo.isMultipart()) {
                 Logger.d("WGet", "createDirect(): MultiPart");
@@ -290,13 +290,13 @@ public class DRunnable implements Runnable {
                 case PARSING:
                 case RETRYING:
                     onGoing = 1;
-                    DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadUid(), "ONGOING");
+                    DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadId(), "ONGOING");
                     break;
                 case MUXING:
                 case ENCODING:
                     //send newer
-                    String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadUid());
-                    String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadUid());
+                    String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadId());
+                    String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadId());
                     //also add subtitles?
                     long length = 0;
                     long count = 0;
@@ -309,7 +309,7 @@ public class DRunnable implements Runnable {
                     //TODO instead of sum of two files, should we just update content length in dbundle table with filesize? that way encoding one also be supported.
 
                     onGoing = 1;
-                    DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadUid(), "ONGOING");
+                    DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadId(), "ONGOING");
                     break;
                 case DOWNLOADING:
                     onGoing = 1;
@@ -318,7 +318,7 @@ public class DRunnable implements Runnable {
                     dProgress.setAvgSpeed(dInfo.getSpeedInfo().getAverageSpeed());
                     dProgress.setCurrentSpeed(dInfo.getSpeedInfo().getCurrentSpeed());
                     dProgress.setThreadCount(activeThreadCount());
-                    DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadUid(), dInfo.toString(), "ONGOING");
+                    DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadId(), dInfo.toString(), "ONGOING");
                     break;
                 case COMPLETE:
                     dBundle.onDownloadComplete();
@@ -327,7 +327,7 @@ public class DRunnable implements Runnable {
                 case STOPPED:
                 case MUX_ERROR:
                 case ENCODE_ERROR:
-                    DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadUid(), dState.toString());
+                    DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadId(), dState.toString());
                     finished.set(true);
                     break;
             }

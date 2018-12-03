@@ -23,7 +23,7 @@ public class DProgress implements Parcelable {
 
     DProgress(DBundle dBundle) {
         this.downloadCode = dBundle.getDownloadCode();
-        this.downloadUid = dBundle.getDownloadUid();
+        this.downloadUid = dBundle.getDownloadId();
         this.title = dBundle.getTitle();
     }
 

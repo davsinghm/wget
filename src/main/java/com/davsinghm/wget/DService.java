@@ -85,7 +85,7 @@ public abstract class DService extends Service {
         DBundle dBundle = intent.getParcelableExtra(EXTRA_DBUNDLE);
 
         if (dBundle != null) {
-            Logger.d("DService: onStartCommand()", "Got DBundle: " + dBundle.getDownloadUid());
+            Logger.d("DService: onStartCommand()", "Got DBundle: " + dBundle.getDownloadId());
 
             if (dManager.queueDownload(dBundle))
                 onBundleQueued(dBundle);

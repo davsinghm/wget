@@ -11,7 +11,7 @@ public abstract class DBundle implements Parcelable {
 
     public abstract BlockingQueue<Job> getJobQueue();
 
-    public abstract String getDownloadUid();
+    public abstract String getDownloadId();
 
     public abstract int getDownloadCode();
 

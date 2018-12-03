@@ -12,12 +12,12 @@ public class DownloadManager {
     @NonNull
     public static DState getDownloadState(Context context, DBundle dBundle) {
 
-        DState dState = getActiveDownloadState(dBundle.getDownloadUid());
+        DState dState = getActiveDownloadState(dBundle.getDownloadId());
         if (dState != null)
             return dState;
 
         String table = dBundle.isAudioOnly() ? DInfoHelper.TABLE_AUDIO : DInfoHelper.TABLE_VIDEO;
-        String state = DInfoHelper.getInstance(context).getInfoState(table, dBundle.getDownloadUid());
+        String state = DInfoHelper.getInstance(context).getInfoState(table, dBundle.getDownloadId());
 
         return DInfoHelper.getInactiveDStateFromString(state);
     }
