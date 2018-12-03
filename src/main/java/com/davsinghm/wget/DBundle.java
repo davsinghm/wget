@@ -23,7 +23,7 @@ public abstract class DBundle implements Parcelable {
 
     public abstract void muxAllFiles() throws Exception;
 
-    public abstract void updateYtUrls() throws Exception;
+    public abstract void updateBundle() throws Exception;
 
     public abstract void onDownloadComplete();
 

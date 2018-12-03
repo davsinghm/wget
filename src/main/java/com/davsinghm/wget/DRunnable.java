@@ -389,7 +389,7 @@ public class DRunnable implements Runnable {
         updateProgress(DState.PARSING);
 
         try {
-            dBundle.updateYtUrls();
+            dBundle.updateBundle();
 
         } catch (InterruptedException | InterruptedIOException e) {
             updateProgress(DState.STOPPED);
