@@ -39,9 +39,6 @@ public abstract class DBundle implements Parcelable {
     public abstract Uri getDirectory();
 
     @NonNull
-    public abstract String getTargetFilename();
-
-    @NonNull
     public abstract String getVideoFilename();
 
     @NonNull
