@@ -57,7 +57,7 @@ public abstract class Direct {
      * @see android.provider.DocumentsContract#createDocument(ContentResolver, Uri, String, String)
      */
     @Nullable
-    public static DocumentFile createFile(@NonNull DocumentFile documentFile, @NonNull String displayName, @Nullable String extension) {
+    DocumentFile createFile(@NonNull DocumentFile documentFile, @NonNull String displayName, @Nullable String extension) {
 
         String mimeType;
         String mimeFromMap = extension != null ? MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) : null;
@@ -95,7 +95,7 @@ public abstract class Direct {
      * this is needed as {@link androidx.documentfile.provider.DocumentFile#findFile(String)} is case sensitive
      */
     @Nullable
-    public static DocumentFile findFile(DocumentFile directoryFile, @NonNull String displayName) {
+    private DocumentFile findFile(DocumentFile directoryFile, @NonNull String displayName) {
         for (DocumentFile doc : directoryFile.listFiles())
             if (displayName.equalsIgnoreCase(doc.getName()))
                 return doc;
@@ -104,7 +104,7 @@ public abstract class Direct {
     }
 
     @Nullable
-    public static String getExtension(@NonNull String filename) {
+    private String getExtension(@NonNull String filename) {
         int index = filename.lastIndexOf(".");
         if (index == -1)
             return null;
@@ -112,7 +112,7 @@ public abstract class Direct {
             return filename.substring(index + 1);
     }
 
-    public static String getBaseName(@NonNull String filename) {
+    private String getBaseName(@NonNull String filename) {
         int index = filename.lastIndexOf(".");
         if (index == -1)
             return filename;
