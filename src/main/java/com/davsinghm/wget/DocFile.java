@@ -67,14 +67,8 @@ public class DocFile {
             String suffix = i == 0 ? "" : " (" + i + ")";
             String filename = displayName + suffix + extension;
 
-            boolean found = false;
-            for (DocumentFile file : files)
-                if (filename.equalsIgnoreCase(file.getName())) {
-                    found = true;
-                    break;
-                }
-
-            if (!found) {
+            DocumentFile doc = findFileIgnoreCase(files, filename);
+            if (doc == null) {
                 displayName = displayName + suffix;
                 break;
             }
@@ -214,24 +208,46 @@ public class DocFile {
     }
 
     @Nullable
-    public DocFile findFile(@NonNull String displayName) {
-        for (DocumentFile doc : documentFile.listFiles())
-            if (displayName.equals(doc.getName()))
-                return new DocFile(context, doc);
+    public DocFile findFile(@NonNull String filename) {
+        DocumentFile doc = findFileIgnoreCase(documentFile.listFiles(), filename);
+        if (doc != null)
+            new DocFile(context, doc);
 
         return null;
     }
 
     @Nullable
-    public DocFile findFileIgnoreCase(@NonNull String displayName) {
-        for (DocumentFile doc : documentFile.listFiles())
-            if (displayName.equalsIgnoreCase(doc.getName()))
-                return new DocFile(context, doc);
+    private DocumentFile findFileIgnoreCase(@NonNull DocumentFile files[], @NonNull String filename) {
+        filename = toLowerCase(filename);
+        for (DocumentFile doc : files)
+            if (filename.equals(toLowerCase(doc.getName())))
+                return doc;
 
         return null;
     }
 
-    public boolean renameTo(@NonNull String displayName) {
-        return documentFile.renameTo(displayName);
+    public boolean renameTo(@NonNull String filename) {
+        return documentFile.renameTo(filename);
+    }
+
+    private String toLowerCase(@Nullable String str) {
+
+        if (str != null) {
+
+            String newStr = "";
+
+            for (int i = 0; i < str.length(); i++) {
+
+                char c = str.charAt(i);
+                if (c >= 'A' && c <= 'Z') {
+                    c = (char) ((c + 32));
+                }
+                newStr = newStr + c;
+            }
+
+            return newStr;
+        }
+
+        return null;
     }
 }
