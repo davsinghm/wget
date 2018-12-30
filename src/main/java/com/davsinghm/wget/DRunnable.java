@@ -166,10 +166,7 @@ public class DRunnable implements Runnable {
         try {
             updateProgress(DState.EXTRACTING);
 
-            Uri directory = dBundle.getDirectory();
-            String filename = dBundle.getSubtitleFilename();
-
-            new DirectSingleBg(context, dBundle.getSubtitleUrl(), directory, filename).downloadPart(stop);
+            new DirectSingleBg(context, dBundle.getSubtitleUrl(), dBundle.getSubtitleUri()).downloadPart(stop);
 
         } catch (Exception e) { //TODO make fatal
             Logger.wtf("DRunnable: Non-Fatal, Critical: downloadSubtitles(): Failed to load subtitles.", e);

@@ -22,12 +22,19 @@ public abstract class Direct {
     private String filename;
     private DownloadInfo info;
     private DocFile targetFile;
+    private Uri targetUri;
 
     public Direct(Context context, DownloadInfo info, Uri directory, String filename) {
         this.context = context;
         this.info = info;
         this.directory = directory;
         this.filename = filename;
+    }
+
+    public Direct(Context context, DownloadInfo info, Uri targetUri) {
+        this.context = context;
+        this.info = info;
+        this.targetUri = targetUri;
     }
 
     protected synchronized DownloadInfo getInfo() {
@@ -64,11 +71,15 @@ public abstract class Direct {
 
         if (targetFile == null) {
             DocFile dirFile = DocFile.fromTreeUri(context, directory);
-            if (dirFile != null && (targetFile = dirFile.findFileIgnoreCase(filename)) == null)
+            if (dirFile != null && (targetFile = dirFile.findFile(filename)) == null)
                 if ((targetFile = dirFile.createFileWithExt(getBaseName(filename), getExtension(filename))) == null)
                     throw new IOException("Unable to create new file");
         }
 
         return targetFile;
+    }
+
+    synchronized Uri getTargetUri() {
+        return targetUri;
     }
 }

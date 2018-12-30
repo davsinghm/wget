@@ -45,5 +45,5 @@ public abstract class DBundle implements Parcelable {
     public abstract String getAudioFilename();
 
     @NonNull
-    public abstract String getSubtitleFilename();
+    public abstract Uri getSubtitleUri();
 }
