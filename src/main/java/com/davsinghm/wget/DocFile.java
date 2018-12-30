@@ -46,9 +46,8 @@ public class DocFile {
     public DocFile createAutoRenamedFileWithExt(@NonNull String filename, @NonNull String extension) {
 
         String newDisplayName = getAutoRenamedDisplayName(filename, extension);
-        if (newDisplayName != null) {
+        if (newDisplayName != null)
             return createFileWithExt(newDisplayName, extension);
-        }
 
         return null;
     }
@@ -211,7 +210,7 @@ public class DocFile {
     public DocFile findFile(@NonNull String filename) {
         DocumentFile doc = findFileIgnoreCase(documentFile.listFiles(), filename);
         if (doc != null)
-            new DocFile(context, doc);
+            return new DocFile(context, doc);
 
         return null;
     }
