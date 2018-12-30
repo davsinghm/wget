@@ -64,7 +64,7 @@ public class DocFile {
         int i;
         for (i = 0; i < 11; i++) {
             String suffix = i == 0 ? "" : " (" + i + ")";
-            String filename = displayName + suffix + extension;
+            String filename = displayName + suffix + "." + extension;
 
             DocumentFile doc = findFileIgnoreCase(files, filename);
             if (doc == null) {
