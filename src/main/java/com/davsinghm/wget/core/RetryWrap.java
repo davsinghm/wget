@@ -95,7 +95,8 @@ public class RetryWrap {
 
                     throw e;
                 } catch (IOException e) {
-                    if (e.getMessage().startsWith("unexpected end of stream")) { //NON-NLS
+                    String message = e.getMessage();
+                    if (message != null && message.startsWith("unexpected end of stream")) { //NON-NLS
                         Logger.w("RetryWrap: run()", "Unexpected EOF, throw DownloadRetry(e)", e);
                         throw new DownloadRetry(e);
                     }
