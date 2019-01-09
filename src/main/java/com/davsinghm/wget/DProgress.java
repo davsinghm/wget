@@ -9,7 +9,7 @@ public class DProgress implements Parcelable {
     }*/
 
     private int downloadCode;
-    private String downloadUid;
+    private String downloadId;
     private String title;
 
     private DState dState;
@@ -23,12 +23,12 @@ public class DProgress implements Parcelable {
 
     DProgress(DBundle dBundle) {
         this.downloadCode = dBundle.getDownloadCode();
-        this.downloadUid = dBundle.getDownloadId();
+        this.downloadId = dBundle.getDownloadId();
         this.title = dBundle.getTitle();
     }
 
-    public String getDownloadUID() {
-        return downloadUid;
+    public String getDownloadId() {
+        return downloadId;
     }
 
     public DState getDState() {
@@ -109,7 +109,7 @@ public class DProgress implements Parcelable {
 
     protected DProgress(Parcel in) {
         downloadCode = in.readInt();
-        downloadUid = in.readString();
+        downloadId = in.readString();
         title = in.readString();
         dState = (DState) in.readValue(DState.class.getClassLoader());
         dLastState = (DState) in.readValue(DState.class.getClassLoader());
@@ -129,7 +129,7 @@ public class DProgress implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(downloadCode);
-        dest.writeString(downloadUid);
+        dest.writeString(downloadId);
         dest.writeString(title);
         dest.writeValue(dState);
         dest.writeValue(dLastState);
