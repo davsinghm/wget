@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import java.util.concurrent.BlockingQueue;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public abstract class DBundle implements Parcelable {
 
@@ -44,6 +45,8 @@ public abstract class DBundle implements Parcelable {
     @NonNull
     public abstract String getAudioFilename();
 
-    @NonNull
+    @Nullable
     public abstract Uri getSubtitleUri();
+
+    public abstract void setProgress(DProgress dProgress);
 }

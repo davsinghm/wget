@@ -70,6 +70,7 @@ public class DRunnable implements Runnable {
     }
 
     private void progressUpdate(int what, DProgress progress) {
+        dBundle.setProgress(progress);
         dManager.progressUpdate(what, progress);
     }
 
