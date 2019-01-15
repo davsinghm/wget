@@ -98,9 +98,8 @@ public class RandomAccessUri {
      * @throws IOException if an I/O error occurs.
      */
     public void close() throws IOException {
-        //fileDescriptor.sync(); TODO
-        fileChannel.force(true);
-        fileChannel.close();
+        if (fileChannel.isOpen())
+            fileChannel.close();
         parcelFileDescriptor.close();
     }
 }

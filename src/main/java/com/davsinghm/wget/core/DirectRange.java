@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectRange extends Direct {
@@ -65,6 +66,8 @@ public class DirectRange extends Direct {
                     throw new DownloadInterruptedError("Interrupted");
             }
 
+        } catch (ClosedByInterruptException e) {
+            throw new DownloadInterruptedError("Interrupted", e);
         } finally {
             if (randomAccessUri != null)
                 randomAccessUri.close();
