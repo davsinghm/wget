@@ -25,16 +25,29 @@ public class DocFile {
     }
 
     @Nullable
-    public static DocFile fromTreeUri(Context context, @Nullable Uri uri) {
-        if (uri != null) {
-            if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
+    public static DocFile fromTreeUri(@NonNull Context context, @Nullable Uri uri) {
+        if (uri != null)
+            if (ContentResolver.SCHEME_FILE.equals(uri.getScheme()))
                 return new DocFile(context, DocumentFile.fromFile(new File(uri.getPath())));
-            } else {
+            else {
                 DocumentFile documentFile = DocumentFile.fromTreeUri(context, uri);
                 if (documentFile != null)
                     return new DocFile(context, documentFile);
             }
-        }
+
+        return null;
+    }
+
+    @Nullable
+    public static DocFile fromSingleUri(@NonNull Context context, @Nullable Uri uri) {
+        if (uri != null)
+            if (ContentResolver.SCHEME_FILE.equals(uri.getScheme()))
+                return new DocFile(context, DocumentFile.fromFile(new File(uri.getPath())));
+            else {
+                DocumentFile documentFile = DocumentFile.fromSingleUri(context, uri);
+                if (documentFile != null)
+                    return new DocFile(context, documentFile);
+            }
 
         return null;
     }
