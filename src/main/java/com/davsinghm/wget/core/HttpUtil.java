@@ -22,7 +22,7 @@ public class HttpUtil {
                 // the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user
                 throw new DownloadMoved(c);
             case HttpURLConnection.HTTP_FORBIDDEN:
-                throw new DownloadIOCodeError(HttpURLConnection.HTTP_FORBIDDEN);
+                throw new DownloadIOCodeError(HttpURLConnection.HTTP_FORBIDDEN, "URL: " + c.getURL().toExternalForm());
             case 416:
                 // HTTP Error 416 - Requested Range Not Satisfiable
                 throw new DownloadIOCodeError(416);
