@@ -71,11 +71,15 @@ public class RandomAccessSafFile {
      * @throws IOException if an I/O error occurs.
      */
     public void write(byte b[], int off, int len) throws IOException {
-        byteBuffer.clear();
-        byteBuffer.put(b, off, len);
-        byteBuffer.flip();
-        while (byteBuffer.hasRemaining())
-            fileChannel.write(byteBuffer);
+        try {
+            byteBuffer.clear();
+            byteBuffer.put(b, off, len);
+            byteBuffer.flip();
+            while (byteBuffer.hasRemaining())
+                fileChannel.write(byteBuffer);
+        } catch (ClosedByInterruptException e) {
+            throw new InterruptedIOException(e.getMessage());
+        }
     }
 
     /**
