@@ -47,29 +47,32 @@ public class RandomAccessSafFile implements RandomAccessUri {
     }
 
     /**
-     * Sets the file-pointer offset, measured from the beginning of this
-     * file, at which the next read or write occurs.  The offset may be
-     * set beyond the end of the file. Setting the offset beyond the end
-     * of the file does not change the file length.  The file length will
-     * change only by writing after the offset has been set beyond the end
-     * of the file.
+     * Sets this channel's file position.
      *
-     * @param pos the offset position, measured in bytes from the
-     *            beginning of the file, at which to set the file
-     *            pointer.
-     * @throws IOException if {@code pos} is less than
-     *                     {@code 0} or if an I/O error occurs.
+     * <p> Setting the position to a value that is greater than the file's
+     * current size is legal but does not change the size of the file.  A later
+     * attempt to read bytes at such a position will immediately return an
+     * end-of-file indication.  A later attempt to write bytes at such a
+     * position will cause the file to be grown to accommodate the new bytes;
+     * the values of any bytes between the previous end-of-file and the
+     * newly-written bytes are unspecified. </p>
+     *
+     * @param pos The new position, a non-negative integer counting
+     *            the number of bytes from the beginning of the file
+     * @throws ClosedChannelException   If this channel is closed
+     * @throws IllegalArgumentException If the new position is negative
+     * @throws IOException              If some other I/O error occurs
      */
     public void seek(long pos) throws IOException {
         fileChannel.position(pos);
     }
 
     /**
-     * @throws InterruptedIOException (ClosedByInterruptException) When thread is interrupted while
-     *                                blocked in an I/O operation upon a channel. Before this
-     *                                exception is thrown the channel will have been closed and the
-     *                                interrupt status of the previously-blocked thread will have
-     *                                been set.
+     * @throws InterruptedIOException When thread is interrupted while blocked in an I/O operation
+     *                                upon a channel. Before this exception is thrown the channel
+     *                                will have been closed and the interrupt status of the
+     *                                previously-blocked thread will have been set.
+     * @throws IOException            If some other I/O error occurs
      */
     public void write(byte b[], int off, int len) throws IOException {
         try {
@@ -95,13 +98,14 @@ public class RandomAccessSafFile implements RandomAccessUri {
     }
 
     /**
-     * Closes this random access file stream and releases any system resources associated with the
-     * stream. A closed random access file cannot perform input or output operations and cannot be
-     * reopened.
+     * Closes this channel.
      *
-     * <p> If this file has an associated channel then the channel is closed as well.
+     * <p> If the channel has already been closed then this method returns immediately.
+     * Otherwise it marks the channel as closed and then invokes the
+     * {@link FileChannel#implCloseChannel implCloseChannel} method in order to complete the close
+     * operation. </p>
      *
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException If an I/O error occurs
      */
     public void close() throws IOException {
         if (fileChannel.isOpen())
