@@ -11,7 +11,10 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 
 import androidx.annotation.NonNull;
@@ -24,14 +27,14 @@ public class RandomAccessSafFile {
     private ByteBuffer byteBuffer;
 
     /**
-     * @param context
+     * @param context Context
      * @param uri     The desired URI to open.
      * @param mode    The file mode to use, as per {@link ContentProvider#openFile
      *                ContentProvider.openFile}.
      * @throws FileNotFoundException Throws FileNotFoundException if no
      *                               file exists under the URI or the mode is invalid.
      */
-    public RandomAccessSafFile(Context context, @NonNull Uri uri, String mode) throws FileNotFoundException {
+    RandomAccessSafFile(Context context, @NonNull Uri uri, String mode) throws FileNotFoundException {
         parcelFileDescriptor = context.getContentResolver().openFileDescriptor(uri, mode);
 
         if (parcelFileDescriptor == null)
@@ -62,13 +65,11 @@ public class RandomAccessSafFile {
     }
 
     /**
-     * Writes {@code len} bytes from the specified byte array
-     * starting at offset {@code off} to this file.
-     *
-     * @param b   the data.
-     * @param off the start offset in the data.
-     * @param len the number of bytes to write.
-     * @throws IOException if an I/O error occurs.
+     * @throws InterruptedIOException (ClosedByInterruptException) When thread is interrupted while
+     *                                blocked in an I/O operation upon a channel. Before this
+     *                                exception is thrown the channel will have been closed and the
+     *                                interrupt status of the previously-blocked thread will have
+     *                                been set.
      */
     public void write(byte b[], int off, int len) throws IOException {
         try {
@@ -83,23 +84,22 @@ public class RandomAccessSafFile {
     }
 
     /**
-     * Returns the length of this file.
+     * Returns the current size of this channel's file.
      *
-     * @return the length of this file, measured in bytes.
-     * @throws IOException if an I/O error occurs.
+     * @return The current size of this channel's file, measured in bytes
+     * @throws ClosedChannelException If this channel is closed
+     * @throws IOException            If some other I/O error occurs
      */
     public long length() throws IOException {
         return fileChannel.size();
     }
 
     /**
-     * Closes this random access file stream and releases any system
-     * resources associated with the stream. A closed random access
-     * file cannot perform input or output operations and cannot be
+     * Closes this random access file stream and releases any system resources associated with the
+     * stream. A closed random access file cannot perform input or output operations and cannot be
      * reopened.
      *
-     * <p> If this file has an associated channel then the channel is closed
-     * as well.
+     * <p> If this file has an associated channel then the channel is closed as well.
      *
      * @throws IOException if an I/O error occurs.
      */
