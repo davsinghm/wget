@@ -15,8 +15,6 @@ import androidx.annotation.Nullable;
 
 public abstract class Direct {
 
-    public static final int BUF_SIZE = 4 * 1024; // size of read buffer
-
     private Context context;
     private Uri directory;
     private String filename;

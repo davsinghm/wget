@@ -69,7 +69,7 @@ public class DirectMultipart extends Direct {
             HttpUtil.checkResponse(urlConnection);
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
-            byte[] bytes = new byte[BUF_SIZE];
+            byte[] bytes = new byte[Constants.BUF_SIZE];
             int read;
             boolean localStop = false;
             while ((read = bufferedInputStream.read(bytes)) > 0) {

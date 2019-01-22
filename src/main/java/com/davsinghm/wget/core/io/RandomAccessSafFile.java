@@ -5,7 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
-import com.davsinghm.wget.core.Direct;
+import com.davsinghm.wget.Constants;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -43,7 +43,7 @@ public class RandomAccessSafFile implements RandomAccessUri {
         fileDescriptor = parcelFileDescriptor.getFileDescriptor();
         fileChannel = new FileOutputStream(fileDescriptor).getChannel(); //TODO
 
-        byteBuffer = ByteBuffer.allocate(Direct.BUF_SIZE); //TODO
+        byteBuffer = ByteBuffer.allocate(Constants.BUF_SIZE); //TODO
     }
 
     /**

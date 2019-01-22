@@ -3,6 +3,7 @@ package com.davsinghm.wget.core;
 import android.content.Context;
 import android.net.Uri;
 
+import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.State;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
@@ -39,7 +40,7 @@ public class DirectSingle extends Direct {
             HttpUtil.checkResponse(urlConnection);
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
-            byte[] bytes = new byte[BUF_SIZE];
+            byte[] bytes = new byte[Constants.BUF_SIZE];
             int read;
             while ((read = bufferedInputStream.read(bytes)) > 0) {
                 randomAccessUri.write(bytes, 0, read);

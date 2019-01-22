@@ -44,7 +44,7 @@ public class DirectSingleBg extends Direct {
 
             randomAccessUri = Utils.openUriFile(getContext(), getTargetUri(), "rw");
 
-            byte[] bytes = new byte[BUF_SIZE];
+            byte[] bytes = new byte[Constants.BUF_SIZE];
             int read;
             while ((read = bufferedInputStream.read(bytes)) > 0) {
                 randomAccessUri.write(bytes, 0, read);
