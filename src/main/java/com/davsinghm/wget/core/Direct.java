@@ -3,7 +3,7 @@ package com.davsinghm.wget.core;
 import android.content.Context;
 import android.net.Uri;
 
-import com.davsinghm.wget.DocFile;
+import com.davsinghm.wget.core.io.DocFile;
 import com.davsinghm.wget.Logger;
 import com.davsinghm.wget.core.info.DownloadInfo;
 

@@ -1,4 +1,4 @@
-package com.davsinghm.wget;
+package com.davsinghm.wget.core.io;
 
 import android.content.ContentResolver;
 import android.content.Context;
