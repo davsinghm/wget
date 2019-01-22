@@ -11,9 +11,9 @@ import com.davsinghm.wget.core.io.RandomAccessUri;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectSingle extends Direct {
@@ -53,7 +53,7 @@ public class DirectSingle extends Direct {
                     throw new DownloadInterruptedError("Interrupted");
             }
 
-        } catch (ClosedByInterruptException e) {
+        } catch (InterruptedIOException e) {
             throw new DownloadInterruptedError("Interrupted", e);
         } finally {
             if (randomAccessUri != null)
