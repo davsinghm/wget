@@ -5,6 +5,7 @@ import android.net.Uri;
 
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
+import com.davsinghm.wget.core.io.RandomAccessUri;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

@@ -1,9 +1,11 @@
-package com.davsinghm.wget.core;
+package com.davsinghm.wget.core.io;
 
 import android.content.ContentProvider;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+
+import com.davsinghm.wget.core.Direct;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;

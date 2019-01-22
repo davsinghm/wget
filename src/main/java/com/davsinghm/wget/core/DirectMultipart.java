@@ -12,6 +12,7 @@ import com.davsinghm.wget.core.info.State;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.info.ex.DownloadMultipartError;
 import com.davsinghm.wget.core.info.ex.DownloadRetry;
+import com.davsinghm.wget.core.io.RandomAccessUri;
 import com.davsinghm.wget.core.threads.LimitThreadPool;
 
 import java.io.BufferedInputStream;
