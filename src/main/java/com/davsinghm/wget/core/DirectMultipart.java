@@ -13,6 +13,7 @@ import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.info.ex.DownloadMultipartError;
 import com.davsinghm.wget.core.info.ex.DownloadRetry;
 import com.davsinghm.wget.core.io.RandomAccessUri;
+import com.davsinghm.wget.core.io.Utils;
 import com.davsinghm.wget.core.threads.LimitThreadPool;
 
 import java.io.BufferedInputStream;
@@ -60,7 +61,7 @@ public class DirectMultipart extends Direct {
             }
 
             synchronized (getContext()) {
-                randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
+                randomAccessUri = Utils.openUriFile(getContext(), getTargetFile().getUri(), "rw");
                 randomAccessUri.seek(start);
             }
 

@@ -7,6 +7,7 @@ import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.State;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.io.RandomAccessUri;
+import com.davsinghm.wget.core.io.Utils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -29,7 +30,7 @@ public class DirectRange extends Direct {
 
         try {
 
-            randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
+            randomAccessUri = Utils.openUriFile(getContext(), getTargetFile().getUri(), "rw");
             /*
                 TODO fix bug, if DefaultSetting is Multipart: off, if download is resuming
                 previously multipart on, if exception occurred (if file length from sever is different than last time [stored in db]) in  fromString() download will resumed with checking file size,

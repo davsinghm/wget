@@ -6,6 +6,7 @@ import android.net.Uri;
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.io.RandomAccessUri;
+import com.davsinghm.wget.core.io.Utils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class DirectSingleBg extends Direct {
 
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
-            randomAccessUri = new RandomAccessUri(getContext(), getTargetUri(), "rw");
+            randomAccessUri = Utils.openUriFile(getContext(), getTargetUri(), "rw");
 
             byte[] bytes = new byte[BUF_SIZE];
             int read;

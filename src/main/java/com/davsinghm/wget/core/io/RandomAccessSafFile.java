@@ -19,7 +19,7 @@ import java.nio.channels.FileChannel;
 
 import androidx.annotation.NonNull;
 
-public class RandomAccessSafFile {
+public class RandomAccessSafFile implements RandomAccessUri {
 
     private ParcelFileDescriptor parcelFileDescriptor;
     private FileDescriptor fileDescriptor;

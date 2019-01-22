@@ -7,6 +7,7 @@ import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.State;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.io.RandomAccessUri;
+import com.davsinghm.wget.core.io.Utils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -31,7 +32,7 @@ public class DirectSingle extends Direct {
             info.setCount(0);
             info.getSpeedInfo().start(0);
 
-            randomAccessUri = new RandomAccessUri(getContext(), getTargetFile().getUri(), "rw");
+            randomAccessUri = Utils.openUriFile(getContext(), getTargetFile().getUri(), "rw");
             randomAccessUri.seek(0); //TODO see if needed
 
             HttpURLConnection urlConnection = HttpUtil.openConnection(info, info.getCount());
