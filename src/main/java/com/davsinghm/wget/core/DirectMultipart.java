@@ -266,7 +266,7 @@ public class DirectMultipart extends Direct {
         if (stop.get())
             throw new DownloadInterruptedError("Stopped");
         if (Thread.interrupted())
-            throw new DownloadInterruptedError("Interupted");
+            throw new DownloadInterruptedError("Interrupted");
         return !limitThreadPool.active() && getPart() == null;
     }
 
