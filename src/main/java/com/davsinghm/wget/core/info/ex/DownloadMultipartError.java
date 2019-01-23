@@ -30,8 +30,8 @@ public class DownloadMultipartError extends DownloadError {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    public DownloadMultipartError(DownloadInfo info) {
-        super();
+    public DownloadMultipartError(String message, Throwable cause, DownloadInfo info) {
+        super(message, cause);
         this.info = info;
     }
 

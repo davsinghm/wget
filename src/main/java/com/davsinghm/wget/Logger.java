@@ -1,8 +1,27 @@
 package com.davsinghm.wget;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import androidx.annotation.Nullable;
+
 public class Logger {
 
     static Callback callback;
+
+    public static void printStackTrace(String tag, @Nullable Throwable throwable) {
+        if (throwable == null)
+            return;
+
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter, false);
+        throwable.printStackTrace(printWriter);
+        printWriter.flush();
+        String[] strings = stringWriter.toString().split("\n");
+        for (String string : strings) {
+            Logger.e(tag, string);
+        }
+    }
 
     public static void wtf(String tag, Throwable t) {
         if (callback != null)

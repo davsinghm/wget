@@ -15,6 +15,7 @@ import com.davsinghm.wget.core.info.ex.DownloadRetry;
 import com.davsinghm.wget.core.io.RandomAccessUri;
 import com.davsinghm.wget.core.io.Utils;
 import com.davsinghm.wget.core.threads.LimitThreadPool;
+import com.davsinghm.wget.core.util.ExceptionUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -300,28 +301,35 @@ public class DirectMultipart extends Direct {
                     limitThreadPool.waitUntilTermination();
 
                     // check if all parts finished with interrupted, throw one interruption
-                    {
-                        boolean interrupted = true;
-                        for (Part pp : getInfo().getPartList()) {
-                            Throwable e = pp.getException();
-                            if (e == null)
-                                continue;
-                            if (e instanceof DownloadInterruptedError)
-                                continue;
-                            interrupted = false;
+                    Throwable cause = null;
+                    boolean multiple = false;
+                    StringBuilder messages = new StringBuilder();
+                    boolean interrupted = true;
+
+                    for (Part pp : getInfo().getPartList()) {
+                        Throwable t = pp.getException();
+                        if (t == null || t instanceof DownloadInterruptedError)
+                            continue;
+                        interrupted = false;
+
+                        if (cause == null) cause = t;
+                        else if (!ExceptionUtils.areThrowableSame(cause, t)) {
+                            cause = new Exception("Multiple Causes");
+                            multiple = true;
                         }
-                        if (interrupted) {
-                            Logger.e("WGet: " + getInfo().getDInfoID() + ": DirectMP", "Fatal! Any of Part is Interrupted, throw DownloadInterruptedError()");
-                            throw new DownloadInterruptedError("Multipart: All interrupted");
-                        }
+
+                        String partId = "Part " + (pp.getNumber() + 1) + "/" + getInfo().getPartList().size();
+                        messages.append("\n  ").append(partId).append(": ").append(ExceptionUtils.getThrowableCauseMessage(t));
+
+                        Logger.printStackTrace(partId, t);
                     }
 
+                    if (interrupted)
+                        throw new DownloadInterruptedError("Multipart: All interrupted");
+
                     // ok all thread stopped. now throw the exception and let app deal with the errors
-                    Logger.e("WGet: " + getInfo().getDInfoID() + ": DirectMP", "Fatal! None of Part is Interrupted though, throw DownloadMultipartError()");
-
-                    throw new DownloadMultipartError(getInfo());
+                    throw new DownloadMultipartError("Fatal! " + cause + (multiple ? messages.toString() : ""), cause, getInfo());
                 }
-
             }
 
             getInfo().setState(State.DONE);
@@ -345,5 +353,4 @@ public class DirectMultipart extends Direct {
             limitThreadPool.shutdown();
         }
     }
-
 }
