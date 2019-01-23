@@ -2,7 +2,6 @@ package com.davsinghm.wget;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 
 import com.davsinghm.wget.core.DirectMultipart;
 import com.davsinghm.wget.core.DirectRange;
@@ -233,27 +232,10 @@ public class DRunnable implements Runnable {
                 new DirectSingle(context, dInfo, directory, filename).download(stop, notify);
             }
 
-        } catch (DownloadMultipartError e) {  //TODO improve, backport add suppressed ? + do all wget exception logging
-
-            if (e.getInfo() != null && e.getInfo().getPartList() != null)
-                for (Part p : e.getInfo().getPartList()) {
-                    String partID = "Part " + (p.getNumber() + 1) + "/" + e.getInfo().getPartList().size() + ": "; //NON-NLS
-                    Logger.e("DRunnable: " + getDInfoID(), partID + "ERROR | start: " + p.getStart() + ", end: " + p.getEnd() + ", count: " + p.getCount() + ", length: " + p.getLength());
-                    Throwable ee = p.getException();
-                    if (ee != null) {
-                        Logger.e("DRunnable: " + getDInfoID() + ": Part: " + (p.getNumber() + 1) + " : PartException", ee.toString());
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-                            e.addSuppressed(ee);
-                        StackTraceElement[] steS = ee.getStackTrace();
-                        for (StackTraceElement ste : steS)
-                            Logger.e("DRunnable: " + getDInfoID() + ": PartException", ste.toString());
-                        Logger.e("DRunnable: " + getDInfoID() + ": PartException", "End of StackTraceElement (Part: " + (p.getNumber() + 1) + ")\n");
-                    }
-                }
+        } catch (DownloadMultipartError e) {
             Logger.wtf("DRunnable: " + getDInfoID(), e);
 
             throw e;
-
         } catch (DownloadInterruptedError e) {
             updateProgress(DState.STOPPED);
             Logger.w("DRunnable: " + getDInfoID(), e);
