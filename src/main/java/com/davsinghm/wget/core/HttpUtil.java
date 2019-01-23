@@ -23,6 +23,8 @@ public class HttpUtil {
                 throw new DownloadMoved(c);
             case HttpURLConnection.HTTP_FORBIDDEN:
                 throw new DownloadIOCodeError(HttpURLConnection.HTTP_FORBIDDEN, "HTTP 403: Forbidden. URL: " + c.getURL().toExternalForm());
+            case HttpURLConnection.HTTP_NOT_FOUND:
+                throw new DownloadIOCodeError(HttpURLConnection.HTTP_NOT_FOUND, "HTTP 404: Not Found. URL: " + c.getURL().toExternalForm());
             case 416:
                 // HTTP Error 416 - Requested Range Not Satisfiable
                 throw new DownloadIOCodeError(416, "HTTP 416: Requested Range Not Satisfiable. URL: " + c.getURL().toExternalForm());
