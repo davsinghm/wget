@@ -84,7 +84,7 @@ public class DirectMultipart extends Direct {
                     localStop = true;
                 }
 
-                randomAccessUri.write(bytes, 0, read);
+                randomAccessUri.write(bytes, 0, read); //TODO catch and rethrow (IOException: No space left on device)
                 part.setCount(part.getCount() + read);
                 getInfo().updateMultipartCount();
                 notify.run();
