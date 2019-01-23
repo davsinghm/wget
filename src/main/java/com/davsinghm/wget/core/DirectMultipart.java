@@ -108,10 +108,10 @@ public class DirectMultipart extends Direct {
                 throw new DownloadRetry("EOF before end of part");
 
         } finally {
-            if (bufferedInputStream != null)
-                bufferedInputStream.close();
             if (randomAccessUri != null)
                 randomAccessUri.close();
+            if (bufferedInputStream != null)
+                bufferedInputStream.close();
         }
 
     }
