@@ -4,7 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.davsinghm.wget.Constants;
-import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
+import com.davsinghm.wget.core.info.ex.DownloadInterruptedException;
 import com.davsinghm.wget.core.io.RandomAccessUri;
 import com.davsinghm.wget.core.io.Utils;
 import com.davsinghm.wget.core.util.HttpUtils;
@@ -51,9 +51,9 @@ public class DirectSingleBg extends Direct {
                 randomAccessUri.write(bytes, 0, read);
 
                 if (stop.get())
-                    throw new DownloadInterruptedError("Stopped");
+                    throw new DownloadInterruptedException("Stopped");
                 if (Thread.interrupted())
-                    throw new DownloadInterruptedError("Interrupted");
+                    throw new DownloadInterruptedException("Interrupted");
             }
 
         } finally {

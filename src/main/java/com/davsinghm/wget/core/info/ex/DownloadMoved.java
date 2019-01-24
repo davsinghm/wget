@@ -31,7 +31,7 @@ public class DownloadMoved extends RuntimeException {
         try {
             return new URL(c.getHeaderField("Location")); //NON-NLS
         } catch (MalformedURLException e) {
-            throw new DownloadError(e);
+            throw new DownloadException(e);
         }
     }
 }

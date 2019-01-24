@@ -9,8 +9,8 @@ import com.davsinghm.wget.Logger;
 import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.Part;
 import com.davsinghm.wget.core.info.State;
-import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
-import com.davsinghm.wget.core.info.ex.DownloadMultipartError;
+import com.davsinghm.wget.core.info.ex.DownloadInterruptedException;
+import com.davsinghm.wget.core.info.ex.DownloadMultipartException;
 import com.davsinghm.wget.core.info.ex.DownloadRetry;
 import com.davsinghm.wget.core.io.RandomAccessUri;
 import com.davsinghm.wget.core.io.Utils;
@@ -91,11 +91,11 @@ public class DirectMultipart extends Direct {
                 notify.run();
 
                 if (stop.get())
-                    throw new DownloadInterruptedError("Stopped");
+                    throw new DownloadInterruptedException("Stopped");
                 if (Thread.interrupted())
-                    throw new DownloadInterruptedError("Interrupted");
+                    throw new DownloadInterruptedException("Interrupted");
                 if (fatal())
-                    throw new DownloadInterruptedError("Fatal");
+                    throw new DownloadInterruptedException("Fatal");
 
                 // do not throw exception here. we normally done downloading.
                 // just took a little bit more
@@ -174,7 +174,7 @@ public class DirectMultipart extends Direct {
                     part.setState(State.DONE);
                     notify.run();
 
-                } catch (DownloadInterruptedError e) {
+                } catch (DownloadInterruptedException e) {
                     part.setState(State.STOP, e);
                     notify.run();
 
@@ -265,9 +265,9 @@ public class DirectMultipart extends Direct {
      */
     private boolean done(AtomicBoolean stop) {
         if (stop.get())
-            throw new DownloadInterruptedError("Stopped");
+            throw new DownloadInterruptedException("Stopped");
         if (Thread.interrupted())
-            throw new DownloadInterruptedError("Interrupted");
+            throw new DownloadInterruptedException("Interrupted");
         return !limitThreadPool.active() && getPart() == null;
     }
 
@@ -309,7 +309,7 @@ public class DirectMultipart extends Direct {
 
                     for (Part pp : getInfo().getPartList()) {
                         Throwable t = pp.getException();
-                        if (t == null || t instanceof DownloadInterruptedError)
+                        if (t == null || t instanceof DownloadInterruptedException)
                             continue;
                         interrupted = false;
 
@@ -326,10 +326,10 @@ public class DirectMultipart extends Direct {
                     }
 
                     if (interrupted)
-                        throw new DownloadInterruptedError("Multipart: All interrupted");
+                        throw new DownloadInterruptedException("Multipart: All interrupted");
 
                     // ok all thread stopped. now throw the exception and let app deal with the errors
-                    throw new DownloadMultipartError("Fatal! " + cause + (multiple ? messages.toString() : ""), cause, getInfo());
+                    throw new DownloadMultipartException("Fatal! " + cause + (multiple ? messages.toString() : ""), cause, getInfo());
                 }
             }
 
@@ -339,8 +339,8 @@ public class DirectMultipart extends Direct {
             getInfo().setState(State.STOP);
             notify.run();
 
-            throw new DownloadInterruptedError(e);
-        } catch (DownloadInterruptedError e) {
+            throw new DownloadInterruptedException(e);
+        } catch (DownloadInterruptedException e) {
             getInfo().setState(State.STOP);
             notify.run();
 

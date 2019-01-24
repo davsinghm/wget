@@ -6,7 +6,7 @@ import android.net.Uri;
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.State;
-import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
+import com.davsinghm.wget.core.info.ex.DownloadInterruptedException;
 import com.davsinghm.wget.core.io.RandomAccessUri;
 import com.davsinghm.wget.core.io.Utils;
 import com.davsinghm.wget.core.util.HttpUtils;
@@ -51,13 +51,13 @@ public class DirectSingle extends Direct {
                 info.updateSpeed();
 
                 if (stop.get())
-                    throw new DownloadInterruptedError("Stopped");
+                    throw new DownloadInterruptedException("Stopped");
                 if (Thread.interrupted())
-                    throw new DownloadInterruptedError("Interrupted");
+                    throw new DownloadInterruptedException("Interrupted");
             }
 
         } catch (InterruptedIOException e) {
-            throw new DownloadInterruptedError("Interrupted", e);
+            throw new DownloadInterruptedException("Interrupted", e);
         } finally {
             if (randomAccessUri != null)
                 randomAccessUri.close();
@@ -101,7 +101,7 @@ public class DirectSingle extends Direct {
 
             getInfo().setState(State.DONE);
             notify.run();
-        } catch (DownloadInterruptedError e) {
+        } catch (DownloadInterruptedException e) {
             getInfo().setState(State.STOP);
             notify.run();
 

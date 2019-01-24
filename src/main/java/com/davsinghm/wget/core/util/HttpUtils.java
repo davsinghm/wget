@@ -2,7 +2,7 @@ package com.davsinghm.wget.core.util;
 
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.DownloadInfo;
-import com.davsinghm.wget.core.info.ex.DownloadIOCodeError;
+import com.davsinghm.wget.core.info.ex.DownloadIOCodeException;
 import com.davsinghm.wget.core.info.ex.DownloadMoved;
 
 import java.io.IOException;
@@ -22,12 +22,12 @@ public class HttpUtils {
                 // the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user
                 throw new DownloadMoved(c);
             case HttpURLConnection.HTTP_FORBIDDEN:
-                throw new DownloadIOCodeError(HttpURLConnection.HTTP_FORBIDDEN, "HTTP 403: Forbidden. URL: " + c.getURL().toExternalForm());
+                throw new DownloadIOCodeException(HttpURLConnection.HTTP_FORBIDDEN, "HTTP 403: Forbidden. URL: " + c.getURL().toExternalForm());
             case HttpURLConnection.HTTP_NOT_FOUND:
-                throw new DownloadIOCodeError(HttpURLConnection.HTTP_NOT_FOUND, "HTTP 404: Not Found. URL: " + c.getURL().toExternalForm());
+                throw new DownloadIOCodeException(HttpURLConnection.HTTP_NOT_FOUND, "HTTP 404: Not Found. URL: " + c.getURL().toExternalForm());
             case 416:
                 // HTTP Error 416 - Requested Range Not Satisfiable
-                throw new DownloadIOCodeError(416, "HTTP 416: Requested Range Not Satisfiable. URL: " + c.getURL().toExternalForm());
+                throw new DownloadIOCodeException(416, "HTTP 416: Requested Range Not Satisfiable. URL: " + c.getURL().toExternalForm());
         }
     }
 

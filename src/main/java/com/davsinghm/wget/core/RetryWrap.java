@@ -4,9 +4,9 @@ import android.content.Context;
 
 import com.davsinghm.wget.Logger;
 import com.davsinghm.wget.NetworkUtils;
-import com.davsinghm.wget.core.info.ex.DownloadError;
-import com.davsinghm.wget.core.info.ex.DownloadIOError;
-import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
+import com.davsinghm.wget.core.info.ex.DownloadException;
+import com.davsinghm.wget.core.info.ex.DownloadIOException;
+import com.davsinghm.wget.core.info.ex.DownloadInterruptedException;
 import com.davsinghm.wget.core.info.ex.DownloadMoved;
 import com.davsinghm.wget.core.info.ex.DownloadRetry;
 
@@ -40,10 +40,10 @@ public class RetryWrap {
 
     private static <T> void moved(AtomicBoolean stop, Wrap<T> wrap, DownloadMoved e) {
         if (stop.get())
-            throw new DownloadInterruptedError("Stopped");
+            throw new DownloadInterruptedException("Stopped");
 
         if (Thread.currentThread().isInterrupted())
-            throw new DownloadInterruptedError("Interrupted");
+            throw new DownloadInterruptedException("Interrupted");
 
         wrap.moved(e.getMoved());
     }
@@ -53,10 +53,10 @@ public class RetryWrap {
             wrap.retry(i, e);
 
             if (stop.get())
-                throw new DownloadInterruptedError("Stopped");
+                throw new DownloadInterruptedException("Stopped");
 
             if (Thread.currentThread().isInterrupted())
-                throw new DownloadInterruptedError("Interrupted");
+                throw new DownloadInterruptedException("Interrupted");
 
             if (!NetworkUtils.isNetworkAvailable(wrap.getContext()))
                 i = RETRY_DELAY;
@@ -64,7 +64,7 @@ public class RetryWrap {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e1) {
-                throw new DownloadInterruptedError(e1); //TODO remove e1, "Interrupted" may be good
+                throw new DownloadInterruptedException(e1); //TODO remove e1, "Interrupted" may be good
             }
         }
     }
@@ -72,9 +72,9 @@ public class RetryWrap {
     public static <T> T run(AtomicBoolean stop, Wrap<T> wrap) {
         while (true) {
             if (stop.get())
-                throw new DownloadInterruptedError("Stopped");
+                throw new DownloadInterruptedException("Stopped");
             if (Thread.currentThread().isInterrupted())
-                throw new DownloadInterruptedError("Interrupted");
+                throw new DownloadInterruptedException("Interrupted");
 
             try {
                 try {
@@ -83,7 +83,7 @@ public class RetryWrap {
                     Logger.wtf("RetryWrap: run()", new DownloadRetry("Retry: SUIHPES, throw DownloadRetry(e)", e));
                     throw new DownloadRetry(e);
                 } catch (FileNotFoundException e) {
-                    throw new DownloadError(e);
+                    throw new DownloadException(e);
                 } catch (RuntimeException e) {
 
                     if (!NetworkUtils.isNetworkAvailable(wrap.getContext())) {
@@ -98,7 +98,7 @@ public class RetryWrap {
                         Logger.wtf("RetryWrap: run()", new DownloadRetry("Retry: Unexpected EOF, throw DownloadRetry(e)", e));
                         throw new DownloadRetry(e);
                     }
-                    throw new DownloadIOError(e);
+                    throw new DownloadIOException(e);
                 }
             } catch (DownloadMoved e) {
                 moved(stop, wrap, e);

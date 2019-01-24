@@ -6,7 +6,7 @@ import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.Logger;
 import com.davsinghm.wget.core.util.HttpUtils;
 import com.davsinghm.wget.core.RetryWrap;
-import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
+import com.davsinghm.wget.core.info.ex.DownloadInterruptedException;
 import com.davsinghm.wget.core.info.ex.DownloadMoved;
 import com.davsinghm.wget.core.info.ex.DownloadRetry;
 
@@ -100,7 +100,7 @@ public class URLInfo extends BrowserInfo {
             setState(State.EXTRACTING_DONE);
             notify.run();
 
-        } catch (DownloadInterruptedError e) {
+        } catch (DownloadInterruptedException e) {
             Logger.e("WGet: URLInfo", "extract(): " + e.toString());
             setState(State.STOP, e);
             notify.run();

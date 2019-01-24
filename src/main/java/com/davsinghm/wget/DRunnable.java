@@ -10,9 +10,9 @@ import com.davsinghm.wget.core.DirectSingleBg;
 import com.davsinghm.wget.core.info.DownloadInfo;
 import com.davsinghm.wget.core.info.Part;
 import com.davsinghm.wget.core.info.State;
-import com.davsinghm.wget.core.info.ex.DownloadError;
-import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
-import com.davsinghm.wget.core.info.ex.DownloadMultipartError;
+import com.davsinghm.wget.core.info.ex.DownloadException;
+import com.davsinghm.wget.core.info.ex.DownloadInterruptedException;
+import com.davsinghm.wget.core.info.ex.DownloadMultipartException;
 import com.davsinghm.wget.core.info.ex.MuxException;
 
 import java.io.InterruptedIOException;
@@ -232,11 +232,11 @@ public class DRunnable implements Runnable {
                 new DirectSingle(context, dInfo, directory, filename).download(stop, notify);
             }
 
-        } catch (DownloadMultipartError e) {
+        } catch (DownloadMultipartException e) {
             Logger.wtf("DRunnable: " + getDInfoID(), e);
 
             throw e;
-        } catch (DownloadInterruptedError e) {
+        } catch (DownloadInterruptedException e) {
             updateProgress(DState.STOPPED);
             Logger.w("DRunnable: " + getDInfoID(), e);
 
@@ -252,7 +252,7 @@ public class DRunnable implements Runnable {
 
         if (dInfo.getState() != State.DONE) {
             updateProgress(DState.ERROR);
-            throw new DownloadError("Test: thrown if State != DONE to exit job loop");
+            throw new DownloadException("Test: thrown if State != DONE to exit job loop");
         }
     }
 
