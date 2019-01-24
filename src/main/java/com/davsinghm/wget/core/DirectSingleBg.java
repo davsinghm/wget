@@ -7,6 +7,7 @@ import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.io.RandomAccessUri;
 import com.davsinghm.wget.core.io.Utils;
+import com.davsinghm.wget.core.util.HttpUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class DirectSingleBg extends Direct {
 
             urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT); //NON-NLS
 
-            HttpUtil.checkResponse(urlConnection);
+            HttpUtils.checkResponse(urlConnection);
 
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 

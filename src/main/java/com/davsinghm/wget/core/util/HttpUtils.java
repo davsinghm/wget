@@ -1,4 +1,4 @@
-package com.davsinghm.wget.core;
+package com.davsinghm.wget.core.util;
 
 import com.davsinghm.wget.Constants;
 import com.davsinghm.wget.core.info.DownloadInfo;
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class HttpUtil {
+public class HttpUtils {
 
     public static void checkResponse(HttpURLConnection c) throws IOException {
 

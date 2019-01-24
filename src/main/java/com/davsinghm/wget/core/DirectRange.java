@@ -9,6 +9,7 @@ import com.davsinghm.wget.core.info.State;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.io.RandomAccessUri;
 import com.davsinghm.wget.core.io.Utils;
+import com.davsinghm.wget.core.util.HttpUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -50,8 +51,8 @@ public class DirectRange extends Direct {
 
             randomAccessUri.seek(info.getCount());
 
-            HttpURLConnection urlConnection = HttpUtil.openConnection(info, info.getCount());
-            HttpUtil.checkResponse(urlConnection);
+            HttpURLConnection urlConnection = HttpUtils.openConnection(info, info.getCount());
+            HttpUtils.checkResponse(urlConnection);
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
             byte[] bytes = new byte[Constants.BUF_SIZE];

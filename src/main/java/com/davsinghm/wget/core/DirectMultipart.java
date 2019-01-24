@@ -16,6 +16,7 @@ import com.davsinghm.wget.core.io.RandomAccessUri;
 import com.davsinghm.wget.core.io.Utils;
 import com.davsinghm.wget.core.threads.LimitThreadPool;
 import com.davsinghm.wget.core.util.ExceptionUtils;
+import com.davsinghm.wget.core.util.HttpUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -66,8 +67,8 @@ public class DirectMultipart extends Direct {
                 randomAccessUri.seek(start);
             }
 
-            HttpURLConnection urlConnection = HttpUtil.openConnection(getInfo(), start, end);
-            HttpUtil.checkResponse(urlConnection);
+            HttpURLConnection urlConnection = HttpUtils.openConnection(getInfo(), start, end);
+            HttpUtils.checkResponse(urlConnection);
             bufferedInputStream = new BufferedInputStream(urlConnection.getInputStream());
 
             byte[] bytes = new byte[Constants.BUF_SIZE];
