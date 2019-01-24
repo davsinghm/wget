@@ -270,7 +270,7 @@ public class DownloadInfo extends URLInfo {
 
         } catch (Exception e) {
             useDefaultSettings(notify);
-            Logger.wtf("WGet: DownloadInfo: " + getDInfoID(), "Load settings failed: " + string, e);
+            Logger.wtf("WGet: DownloadInfo: " + getDInfoID(), new Exception("Load settings failed: " + string, e));
         }
 
     }
