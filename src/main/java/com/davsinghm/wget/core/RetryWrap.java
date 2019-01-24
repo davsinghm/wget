@@ -5,7 +5,6 @@ import android.content.Context;
 import com.davsinghm.wget.Logger;
 import com.davsinghm.wget.NetworkUtils;
 import com.davsinghm.wget.core.info.ex.DownloadError;
-import com.davsinghm.wget.core.info.ex.DownloadIOCodeError;
 import com.davsinghm.wget.core.info.ex.DownloadIOError;
 import com.davsinghm.wget.core.info.ex.DownloadInterruptedError;
 import com.davsinghm.wget.core.info.ex.DownloadMoved;
@@ -16,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.HttpRetryException;
-import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.SocketException;
 import java.net.URL;
@@ -82,14 +80,14 @@ public class RetryWrap {
                 try {
                     return wrap.download();
                 } catch (SocketException | UnknownHostException | InterruptedIOException | HttpRetryException | ProtocolException | EOFException | SSLException e) {
-                    Logger.w("RetryWrap: run()", "SUIHPES, throw DownloadRetry(e)", e);
+                    Logger.wtf("RetryWrap: run()", new DownloadRetry("Retry: SUIHPES, throw DownloadRetry(e)", e));
                     throw new DownloadRetry(e);
                 } catch (FileNotFoundException e) {
                     throw new DownloadError(e);
                 } catch (RuntimeException e) {
 
                     if (!NetworkUtils.isNetworkAvailable(wrap.getContext())) {
-                        Logger.w("RetryWrap: run()", "throw DownloadRetry(e)", e);
+                        Logger.wtf("RetryWrap: run()", new DownloadRetry("Retry: throw DownloadRetry(e)", e));
                         throw new DownloadRetry(e);
                     }
 
@@ -97,7 +95,7 @@ public class RetryWrap {
                 } catch (IOException e) {
                     String message = e.getMessage();
                     if (message != null && message.startsWith("unexpected end of stream")) { //NON-NLS
-                        Logger.w("RetryWrap: run()", "Unexpected EOF, throw DownloadRetry(e)", e);
+                        Logger.wtf("RetryWrap: run()", new DownloadRetry("Retry: Unexpected EOF, throw DownloadRetry(e)", e));
                         throw new DownloadRetry(e);
                     }
                     throw new DownloadIOError(e);
