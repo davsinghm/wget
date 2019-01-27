@@ -22,6 +22,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectMultipart extends Direct {
@@ -200,8 +202,10 @@ public class DirectMultipart extends Direct {
         String tag = "DirectMP: " + getInfo().getDInfoID() + ": collaborate()";
         Logger.d(tag, "runningPartCount: " + c + ", threadCount: " + threadCount + ", enteringLoop: " + (c < threadCount && c > 0));
 
-        if (c < threadCount && c > 0)
-            for (Part part : getInfo().getSortedPartList()) {
+        if (c < threadCount && c > 0) {
+            List<Part> partList = getInfo().getPartList();
+            Collections.sort(partList, Part.PartComparator);
+            for (Part part : partList) {
                 int listSize = getInfo().getPartList().size();
                 State state = part.getState();
                 if (state.equals(State.DOWNLOADING) || state.equals(State.RETRYING)) {
@@ -232,7 +236,7 @@ public class DirectMultipart extends Direct {
                     break;
                 }
             }
-
+        }
     }
 
     private int runningPartCount() {

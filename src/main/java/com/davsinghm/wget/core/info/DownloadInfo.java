@@ -71,14 +71,6 @@ public class DownloadInfo extends URLInfo {
         return partList;
     }
 
-    public synchronized List<Part> getSortedPartList() {
-        synchronized (getPartList()) {
-            if (getPartList() != null)
-                Collections.sort(getPartList(), Part.PartComparator);
-            return getPartList();
-        }
-    }
-
     @Override
     public synchronized State getState() {
         if (isMultipart()) {
