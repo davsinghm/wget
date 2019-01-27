@@ -197,13 +197,14 @@ public class DirectMultipart extends Direct {
 
         long minPartLength = getInfo().getDSettings().getMinPartLength();
         int threadCount = getInfo().getDSettings().getThreadCount();
-        int c = runningPartCount();
+
+        List<Part> partList = getInfo().getPartList();
+        int running = runningPartCount(partList);
 
         String tag = "DirectMP: " + getInfo().getDInfoID() + ": collaborate()";
-        Logger.d(tag, "runningPartCount: " + c + ", threadCount: " + threadCount + ", enteringLoop: " + (c < threadCount && c > 0));
+        Logger.d(tag, "runningPartCount: " + running + ", threadCount: " + threadCount + ", enteringLoop: " + (running < threadCount && running > 0));
 
-        if (c < threadCount && c > 0) {
-            List<Part> partList = getInfo().getPartList();
+        if (running < threadCount && running > 0) {
             Collections.sort(partList, Part.PartComparator);
             for (Part part : partList) {
                 int listSize = getInfo().getPartList().size();
@@ -239,12 +240,12 @@ public class DirectMultipart extends Direct {
         }
     }
 
-    private int runningPartCount() {
+    private int runningPartCount(List<Part> partList) {
         int running = 0;
-        for (Part part : getInfo().getPartList()) {
+        for (Part part : partList)
             if (part.getState().equals(State.WAITING) || part.getState().equals(State.QUEUED) || part.getState().equals(State.DOWNLOADING) || part.getState().equals(State.RETRYING))
                 running++;
-        }
+
         return running;
     }
 
