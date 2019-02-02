@@ -238,14 +238,14 @@ public class DRunnable implements Runnable {
             throw e;
         } catch (DownloadInterruptedException e) {
             updateProgress(DState.STOPPED);
-            Logger.w("DRunnable: " + getDInfoID(), e);
+            //Logger.w("DRunnable: " + getDInfoID(), e);
 
             throw e;
         } catch (Exception e) {
             updateProgress(DState.ERROR);
             stop.set(true);
 
-            Logger.wtf("DRunnable: " + getDInfoID(), e);
+            Logger.wtf("DRunnable: " + getDInfoID(), new Exception("BundleId: " + dBundle.getDownloadId(), e));
 
             throw e;
         }
