@@ -95,7 +95,9 @@ public class DocFile {
     /**
      * this tries to create file with give extension. problem is MimeTypeMap is not one to one map
      * <p>
-     * Create a new document as a direct child of this directory.
+     * Create a new document as a direct child of this directory with given displayName and
+     * extension. The displayName shouldn't contain extension and should be checked before calling
+     * this function
      *
      * @param displayName name of new document, without any file extension appended
      * @param extension   extension of the file
@@ -105,9 +107,16 @@ public class DocFile {
     @Nullable
     public DocFile createFileWithExt(@NonNull String displayName, @Nullable String extension) {
 
+        // FIXME this heuristic has a flaw. upon calling this function,
+        // if mimeType is "application/octet-stream" and if a file already exists,
+        // the system will append number to a file, resulting in failure of desired ext
+        // e.g. resulting file will be file.ext (1) instead of file (1).ext
+        // so it should only be called if findFile() returns null, which will work most of the time
+
         String mimeType = null;
         String extFromMap = null;
         String mimeTypeFromMap;
+        boolean nameContainsExt = displayName.endsWith("." + extension);
 
         //checks if map returns same extension from mime type
         if ((mimeTypeFromMap = extension != null ? MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) : null) != null)
@@ -125,15 +134,17 @@ public class DocFile {
         //check if extension is same
         if (newFile != null) {
             String name = newFile.getName();
-            if (name == null || (!name.endsWith("." + extension) || name.endsWith("." + extension + "." + extension))) {
+            if (name == null || (!name.endsWith("." + extension) ||
+                    name.endsWith("." + extension + "." + extension) // to make sure system doesn't append the ext again
+                            && !nameContainsExt)) // and only when displayName didn't contain ext
+            {
                 newFile.delete();
-                throw new AssertionError("The extension appended by the system doesn't match provided extension. DisplayName: " + displayName + "\ngetName(): " + name + "\nExt: " + extension + ", MimeType: " + mimeType + ", ExtFromMap: " + extFromMap + ", MimeFromMap: " + mimeTypeFromMap);
+                throw new RuntimeException("The extension appended by the system doesn't match provided extension. DisplayName: " + displayName + "\ngetName(): " + name + "\nExt: " + extension + ", MimeType: " + mimeType + ", ExtFromMap: " + extFromMap + ", MimeFromMap: " + mimeTypeFromMap);
             }
         }
 
         return newFile;
     }
-
 
     @Nullable
     public DocFile createFileWithType(@NonNull String mimeType, @NonNull String displayName) {
