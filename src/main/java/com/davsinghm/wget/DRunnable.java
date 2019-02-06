@@ -356,7 +356,7 @@ public class DRunnable implements Runnable {
         } catch (InterruptedException | InterruptedIOException e) {
             updateProgress(DState.STOPPED);
             throw new MuxException(e);
-        } catch (Exception e) {
+        } catch (Throwable e) { //also catch system errors: unsatisfied link error etc.
             Logger.wtf("DRunnable", e);
 
             updateProgress(DState.MUX_ERROR);
