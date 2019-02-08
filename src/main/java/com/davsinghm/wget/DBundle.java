@@ -22,7 +22,9 @@ public abstract class DBundle implements Parcelable {
 
     public abstract boolean isAudioOnly();
 
-    public abstract void muxAllFiles() throws Exception;
+    public abstract void muxAllFiles(MuxStatCallback muxStatCallback) throws Exception;
+
+    public abstract void cancelMux();
 
     public abstract void updateBundle() throws Exception;
 

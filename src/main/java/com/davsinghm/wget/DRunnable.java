@@ -351,7 +351,17 @@ public class DRunnable implements Runnable {
         updateProgress(DState.MUXING);
 
         try {
-            dBundle.muxAllFiles();
+
+            MuxStatCallback statisticsCallback = new MuxStatCallback() {
+                @Override
+                public void onStatisticsUpdated(int time, int totalTime) {
+                    dProgress.setTime(time);
+                    dProgress.setTotalTime(totalTime);
+                    updateProgress(DState.MUXING);
+                }
+            };
+
+            dBundle.muxAllFiles(statisticsCallback);
 
         } catch (InterruptedException | InterruptedIOException e) {
             updateProgress(DState.STOPPED);

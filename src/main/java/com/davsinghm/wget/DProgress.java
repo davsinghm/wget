@@ -1,4 +1,5 @@
 package com.davsinghm.wget;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -20,6 +21,8 @@ public class DProgress implements Parcelable {
     private int avgSpeed; //Bytes per second;
     private int currentSpeed; //Bytes per second;
     private String threadCount;
+    private int time; //time, mux stats
+    private int totalTime; //total time, mux stats
 
     DProgress(DBundle dBundle) {
         this.downloadCode = dBundle.getDownloadCode();
@@ -107,6 +110,22 @@ public class DProgress implements Parcelable {
         this.threadCount = threadCount;
     }
 
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+    public int getTotalTime() {
+        return totalTime;
+    }
+
+    public void setTotalTime(int totalTime) {
+        this.totalTime = totalTime;
+    }
+
     protected DProgress(Parcel in) {
         downloadCode = in.readInt();
         downloadId = in.readString();
@@ -119,6 +138,8 @@ public class DProgress implements Parcelable {
         avgSpeed = in.readInt();
         currentSpeed = in.readInt();
         threadCount = in.readString();
+        time = in.readInt();
+        totalTime = in.readInt();
     }
 
     @Override
@@ -139,6 +160,8 @@ public class DProgress implements Parcelable {
         dest.writeInt(avgSpeed);
         dest.writeInt(currentSpeed);
         dest.writeString(threadCount);
+        dest.writeInt(time);
+        dest.writeInt(totalTime);
     }
 
     @SuppressWarnings("unused")
