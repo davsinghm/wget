@@ -37,6 +37,7 @@ public class DRunnable implements Runnable {
 
     private BlockingQueue<Job> jobQueue;
 
+    @Nullable
     private Job currentJob;
     @NonNull
     private DState lastDState = DState.QUEUED; // used to display in activity;
@@ -75,6 +76,7 @@ public class DRunnable implements Runnable {
 
     void stopDownload() {
         stop.set(true);
+        interruptMuxer();
         if (currentThread != null)
             currentThread.interrupt();
     }
@@ -344,6 +346,11 @@ public class DRunnable implements Runnable {
             return "[" + running + "/" + dInfo.getDSettings().getThreadCount() + "]";
         }
         return null;
+    }
+
+    private void interruptMuxer() {
+        if (currentJob == Job.MUX || currentJob == Job.ENCODE)
+            dBundle.cancelMux();
     }
 
     private void muxAudioVideo() throws MuxException {
