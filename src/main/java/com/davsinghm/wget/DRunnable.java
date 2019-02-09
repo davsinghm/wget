@@ -276,20 +276,6 @@ public class DRunnable implements Runnable {
                     break;
                 case MUXING:
                 case ENCODING:
-                    //send newer
-                    String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadId());
-                    String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadId());
-                    //also add subtitles?
-                    long length = 0;
-                    long count = 0;
-                    length += DInfoHelper.getLengthFromInfoString(videoStr);
-                    length += DInfoHelper.getLengthFromInfoString(audioStr);
-                    count += DInfoHelper.getCountFromInfoString(videoStr);
-                    count += DInfoHelper.getCountFromInfoString(audioStr);
-                    dProgress.setLength(length);
-                    dProgress.setCount(count);
-                    //TODO instead of sum of two files, should we just update content length in dbundle table with filesize? that way encoding one also be supported.
-
                     onGoing = 1;
                     DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadId(), "ONGOING");
                     break;
@@ -303,6 +289,20 @@ public class DRunnable implements Runnable {
                     DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadId(), dInfo.toString(), "ONGOING");
                     break;
                 case COMPLETE:
+                    //TODO move. problem. if muxing fails the file sizes will be incorrect.
+                    //send newer
+                    String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadId());
+                    String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadId());
+                    //also add subtitles?
+                    long length = 0;
+                    long count = 0;
+                    length += DInfoHelper.getLengthFromInfoString(videoStr);
+                    length += DInfoHelper.getLengthFromInfoString(audioStr);
+                    count += DInfoHelper.getCountFromInfoString(videoStr);
+                    count += DInfoHelper.getCountFromInfoString(audioStr);
+                    dProgress.setLength(length);
+                    dProgress.setCount(count);
+
                     dBundle.onDownloadComplete();
 
                 case ERROR:
