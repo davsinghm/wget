@@ -290,13 +290,15 @@ public class DRunnable implements Runnable {
                     dProgress.setThreadCount(activeThreadCount());
                     DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadId(), dInfo.toString(), "ONGOING");
                     break;
-                case COMPLETE:
-                    //TODO move. problem. if muxing fails the file sizes will be incorrect or when state changes but final download update is not sent because it was before DRUNNABLE_PROGRESS_UPDATE_INTERVAL
-                    if (dBundle.isTwoPartDownload()) { //only update two part, because this conflicts with onmuxfinished, which also update final file size
-                        //send newer
+                case ERROR:
+                case STOPPED:
+                case MUX_ERROR:
+                case ENCODE_ERROR:
+                    //FIXME remove this hack. on error the updated sizes are not sent because of update delay (interval condition)
+                    if (dBundle.isTwoPartDownload()) {
+                        //read from helper, and update dprogress
                         String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadId());
                         String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadId());
-                        //also add subtitles?
                         long length = 0;
                         long count = 0;
                         length += DInfoHelper.getLengthFromInfoString(videoStr);
@@ -306,13 +308,9 @@ public class DRunnable implements Runnable {
                         dProgress.setLength(length);
                         dProgress.setCount(count);
                     }
-
+                case COMPLETE:
                     dBundle.onDownloadComplete();
 
-                case ERROR:
-                case STOPPED:
-                case MUX_ERROR:
-                case ENCODE_ERROR:
                     DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadId(), dState.toString());
                     finished.set(true);
                     break;
@@ -373,6 +371,12 @@ public class DRunnable implements Runnable {
 
                 @Override
                 public void onMuxFinished(long fileSize) {
+                    if (fileSize > 0) { //FIXME this overrides the size of stream, use different tables to save final data
+                        String audioStr = DInfoHelper.getInstance(context).getInfoString(getTableName(), dBundle.getDownloadId());
+                        DInfoHelper.getInstance(context).updateCountAndLengthWithInfoString(getTableName(), dBundle.getDownloadId(), audioStr, fileSize, fileSize);
+                        dProgress.setCount(fileSize);
+                        dProgress.setLength(fileSize);
+                    }
                 }
             };
 
@@ -405,8 +409,8 @@ public class DRunnable implements Runnable {
 
                 @Override
                 public void onMuxFinished(long fileSize) {
-                    if (fileSize > 0) {
-                        String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadId());
+                    if (fileSize > 0) { //FIXME this overrides the size of stream, use different tables to save final data
+                        String audioStr = DInfoHelper.getInstance(context).getInfoString(getTableName(), dBundle.getDownloadId());
                         DInfoHelper.getInstance(context).updateCountAndLengthWithInfoString(getTableName(), dBundle.getDownloadId(), audioStr, fileSize, fileSize);
                         dProgress.setCount(fileSize);
                         dProgress.setLength(fileSize);
