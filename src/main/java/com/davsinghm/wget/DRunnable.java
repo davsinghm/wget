@@ -439,6 +439,8 @@ public class DRunnable implements Runnable {
             updateProgress(DState.STOPPED);
             throw e;
         } catch (Exception e) {
+            Logger.wtf("DRunnable", e);
+
             updateProgress(DState.ERROR);
             throw e;
         }
