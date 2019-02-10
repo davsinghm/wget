@@ -128,6 +128,7 @@ public class DRunnable implements Runnable {
                     downloadSubtitles();
                     break;
                 case ENCODE:
+                    encodeAudio();
                     break;
                 case MUX:
                     muxAudioVideo();
@@ -151,8 +152,9 @@ public class DRunnable implements Runnable {
             case SUBTITLE:
             case MUX:
                 return DInfoHelper.TABLE_VIDEO;
-            case AUDIO:
             case ENCODE:
+                return dBundle.isAudioOnly() ? DInfoHelper.TABLE_AUDIO : DInfoHelper.TABLE_VIDEO;
+            case AUDIO:
                 return DInfoHelper.TABLE_AUDIO;
         }
         return null;
@@ -289,19 +291,21 @@ public class DRunnable implements Runnable {
                     DInfoHelper.getInstance(context).addInfo(getTableName(), dBundle.getDownloadId(), dInfo.toString(), "ONGOING");
                     break;
                 case COMPLETE:
-                    //TODO move. problem. if muxing fails the file sizes will be incorrect.
-                    //send newer
-                    String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadId());
-                    String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadId());
-                    //also add subtitles?
-                    long length = 0;
-                    long count = 0;
-                    length += DInfoHelper.getLengthFromInfoString(videoStr);
-                    length += DInfoHelper.getLengthFromInfoString(audioStr);
-                    count += DInfoHelper.getCountFromInfoString(videoStr);
-                    count += DInfoHelper.getCountFromInfoString(audioStr);
-                    dProgress.setLength(length);
-                    dProgress.setCount(count);
+                    //TODO move. problem. if muxing fails the file sizes will be incorrect or when state changes but final download update is not sent because it was before DRUNNABLE_PROGRESS_UPDATE_INTERVAL
+                    if (dBundle.isTwoPartDownload()) { //only update two part, because this conflicts with onmuxfinished, which also update final file size
+                        //send newer
+                        String videoStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_VIDEO, dBundle.getDownloadId());
+                        String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadId());
+                        //also add subtitles?
+                        long length = 0;
+                        long count = 0;
+                        length += DInfoHelper.getLengthFromInfoString(videoStr);
+                        length += DInfoHelper.getLengthFromInfoString(audioStr);
+                        count += DInfoHelper.getCountFromInfoString(videoStr);
+                        count += DInfoHelper.getCountFromInfoString(audioStr);
+                        dProgress.setLength(length);
+                        dProgress.setCount(count);
+                    }
 
                     dBundle.onDownloadComplete();
 
@@ -366,6 +370,10 @@ public class DRunnable implements Runnable {
                     dProgress.setTotalTime(totalTime);
                     updateProgress(DState.MUXING);
                 }
+
+                @Override
+                public void onMuxFinished(long fileSize) {
+                }
             };
 
             dBundle.muxAllFiles(statisticsCallback);
@@ -377,6 +385,45 @@ public class DRunnable implements Runnable {
             Logger.wtf("DRunnable", e);
 
             updateProgress(DState.MUX_ERROR);
+            throw new MuxException(e);
+        }
+    }
+
+    private void encodeAudio() throws MuxException {
+
+        updateProgress(DState.ENCODING);
+
+        try {
+
+            MuxStatCallback statisticsCallback = new MuxStatCallback() {
+                @Override
+                public void onStatisticsUpdated(int time, int totalTime) {
+                    dProgress.setTime(time);
+                    dProgress.setTotalTime(totalTime);
+                    updateProgress(DState.ENCODING);
+                }
+
+                @Override
+                public void onMuxFinished(long fileSize) {
+                    if (fileSize > 0) {
+                        String audioStr = DInfoHelper.getInstance(context).getInfoString(DInfoHelper.TABLE_AUDIO, dBundle.getDownloadId());
+                        DInfoHelper.getInstance(context).updateCountAndLengthWithInfoString(getTableName(), dBundle.getDownloadId(), audioStr, fileSize, fileSize);
+                        dProgress.setCount(fileSize);
+                        dProgress.setLength(fileSize);
+                    }
+                    //updateProgress(DState.ENCODING); the complete will send it
+                }
+            };
+
+            dBundle.encodeAudio(statisticsCallback);
+
+        } catch (InterruptedException | InterruptedIOException e) {
+            updateProgress(DState.STOPPED);
+            throw new MuxException(e);
+        } catch (Throwable e) { //also catch system errors: unsatisfied link error etc.
+            Logger.wtf("DRunnable", e);
+
+            updateProgress(DState.ENCODE_ERROR);
             throw new MuxException(e);
         }
     }

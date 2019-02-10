@@ -22,6 +22,8 @@ public abstract class DBundle implements Parcelable {
 
     public abstract boolean isAudioOnly();
 
+    public abstract void encodeAudio(MuxStatCallback muxStatCallback) throws Exception;
+
     public abstract void muxAllFiles(MuxStatCallback muxStatCallback) throws Exception;
 
     public abstract void cancelMux();

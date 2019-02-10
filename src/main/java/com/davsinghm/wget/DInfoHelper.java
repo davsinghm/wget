@@ -159,6 +159,26 @@ public class DInfoHelper extends SQLiteOpenHelper {
         return DState.STOPPED;
     }
 
+    public static String join(String delimiter, String[] elements) {
+        StringBuilder result = new StringBuilder();
+        int i = 0;
+        for (String element : elements) {
+            result.append(element);
+            if (++i != elements.length)
+                result.append(delimiter);
+        }
+        return result.toString();
+    }
+
+    public void updateCountAndLengthWithInfoString(String table, String id, String str, long count, long length) {
+        String[] ss1 = str.split("<l>");
+        ss1[0] = String.valueOf(count);
+        ss1[1] = String.valueOf(length);
+
+        str = join("<l>", ss1);
+        addInfoString(table, id, str);
+    }
+
     public class TempDInfo {
         public DState dInactiveState;
         public long count;
