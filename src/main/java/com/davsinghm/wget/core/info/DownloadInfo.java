@@ -9,7 +9,6 @@ import com.davsinghm.wget.core.SpeedInfo;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
