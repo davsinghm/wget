@@ -309,7 +309,8 @@ public class DRunnable implements Runnable {
                         dProgress.setCount(count);
                     }
                 case COMPLETE:
-                    dBundle.onDownloadComplete();
+                    if (dState == DState.COMPLETE)
+                        dBundle.onDownloadComplete();
 
                     DInfoHelper.getInstance(context).addInfoState(getTableName(), dBundle.getDownloadId(), dState.toString());
                     finished.set(true);
